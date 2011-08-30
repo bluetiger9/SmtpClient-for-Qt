@@ -1,6 +1,6 @@
 #include <QtGui/QApplication>
 
-#include "SmtpMime"
+#include "../src/SmtpMime"
 
 
 int main(int argc, char *argv[])

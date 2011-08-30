@@ -10,25 +10,26 @@ TARGET = SMTPEmail
 TEMPLATE = app
 
 
-SOURCES += smtpclient.cpp \
-    mimemessage.cpp \
-    mimepart.cpp \
-    mimetext.cpp \
-    mimeattachment.cpp \
-    mimehtml.cpp \
-    emailaddress.cpp \
-    mimefile.cpp \
-    mimeinlinefile.cpp \
-    main.cpp
+SOURCES += \
+    src/emailaddress.cpp \
+    src/mimeattachment.cpp \
+    src/mimefile.cpp \
+    src/mimehtml.cpp \
+    src/mimeinlinefile.cpp \
+    src/mimemessage.cpp \
+    src/mimepart.cpp \
+    src/mimetext.cpp \
+    src/smtpclient.cpp \
+    demos/demo1.cpp
 
 HEADERS  += \
-    smtpclient.h \
-    mimemessage.h \
-    mimepart.h \
-    mimetext.h \
-    mimeattachment.h \
-    mimehtml.h \
-    emailaddress.h \
-    mimefile.h \
-    mimeinlinefile.h \
-    SmtpMime
+    src/emailaddress.h \
+    src/mimeattachment.h \
+    src/mimefile.h \
+    src/mimehtml.h \
+    src/mimeinlinefile.h \
+    src/mimemessage.h \
+    src/mimepart.h \
+    src/mimetext.h \
+    src/smtpclient.h \
+    src/SmtpMime
