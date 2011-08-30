@@ -1,0 +1,9 @@
+Copyright (c) 2011 - Tőkés Attila (bluetiger9)
+
+
+SMTP Client for Qt (C++)
+------------------------
+
+An SMTP Client writen in C++ for Qt.
+Allows applications to send emails (MIME with text, html, attachments, inline files, etc.) via SMTP.
+Supports SSL and SMTP authentification.
