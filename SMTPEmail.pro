@@ -19,7 +19,7 @@ SOURCES += main.cpp \
     mimehtml.cpp \
     emailaddress.cpp \
     mimefile.cpp \
-    mimeinlinefile.cpp
+    mimeinlinefile.cpp \
 
 HEADERS  += \
     smtpclient.h \
