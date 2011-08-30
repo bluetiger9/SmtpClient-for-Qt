@@ -33,3 +33,5 @@ HEADERS  += \
     src/mimetext.h \
     src/smtpclient.h \
     src/SmtpMime
+
+OTHER_FILES +=
