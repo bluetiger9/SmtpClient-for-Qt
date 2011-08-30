@@ -10,8 +10,7 @@ TARGET = SMTPEmail
 TEMPLATE = app
 
 
-SOURCES += main.cpp \
-    smtpclient.cpp \
+SOURCES += smtpclient.cpp \
     mimemessage.cpp \
     mimepart.cpp \
     mimetext.cpp \
