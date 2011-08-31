@@ -40,7 +40,7 @@ public:
 
     /* [1] Constructors and Destructors */
 
-    SmtpClient(QString host = "locahost", int port = 25, ConnectionType ct = TcpConnection);
+    SmtpClient(const QString & host = "locahost", int port = 25, ConnectionType ct = TcpConnection);
 
     ~SmtpClient();
 

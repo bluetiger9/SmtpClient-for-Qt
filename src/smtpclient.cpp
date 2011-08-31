@@ -12,7 +12,7 @@
 
 /* [1] Constructors and destructors */
 
-SmtpClient::SmtpClient(QString host, int port, ConnectionType ct) :
+SmtpClient::SmtpClient(const QString & host, int port, ConnectionType ct) :
     authMethod(AuthPlain),
     connectionTimeout(5000),
     responseTimeout(5000)
