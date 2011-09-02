@@ -11,7 +11,7 @@
   SmtpClient for Qt is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY.
 
-  See the LICENCE file for more details.
+  See the LICENSE file for more details.
 */
 
 #ifndef MIMEPART_H
