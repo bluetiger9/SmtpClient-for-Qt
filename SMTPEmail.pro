@@ -36,7 +36,9 @@ HEADERS  += \
     src/SmtpMime \
     demos/demo2/sendemail.h
 
-OTHER_FILES +=
+OTHER_FILES += \
+    demos/demo2/printscreen.png \
+    LICENCE
 
 FORMS += \
     demos/demo2/sendemail.ui
