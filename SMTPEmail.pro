@@ -39,8 +39,7 @@ HEADERS  += \
 OTHER_FILES += \
     demos/demo2/printscreen.png \
     LICENSE \
-    README.md \
-    README
+    README.md
 
 FORMS += \
     demos/demo2/sendemail.ui
