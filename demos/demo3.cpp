@@ -1,3 +1,19 @@
+/*
+  Copyright (c) 2011 - Tőkés Attila
+
+  This file is part of SmtpClient for Qt.
+
+  SmtpClient for Qt is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 2 of the License, or
+  (at your option) any later version.
+
+  SmtpClient for Qt is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY.
+
+  See the LICENSE file for more details.
+*/
+
 #include <QtGui/QApplication>
 #include "../src/SmtpMime"
 
@@ -23,22 +39,16 @@ int main(int argc, char *argv[])
     // Add some text
 
     MimeText text;
-
-    text.setText("Hi,\nThis is a simple email message with some attachments.\n");
-
+    text.setText("Hi!\n This is an email with some attachments.");
     message.addPart(&text);
 
-
     // Now we create the attachment object
-
     MimeAttachment attachment (new QFile("image1.jpg"));
 
     // the file type can be setted. (by default is application/octet-stream)
-
     attachment.setType("image/jpg");
 
     // Now add it to message
-
     message.addPart(&attachment);
 
     // Add an another attachment

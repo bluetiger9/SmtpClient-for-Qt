@@ -19,9 +19,7 @@ SOURCES += \
     src/mimemessage.cpp \
     src/mimepart.cpp \
     src/mimetext.cpp \
-    src/smtpclient.cpp \
-    demos/demo2/sendemail.cpp \
-    demos/demo2/demo2.cpp
+    src/smtpclient.cpp
 
 HEADERS  += \
     src/emailaddress.h \
@@ -33,13 +31,10 @@ HEADERS  += \
     src/mimepart.h \
     src/mimetext.h \
     src/smtpclient.h \
-    src/SmtpMime \
-    demos/demo2/sendemail.h
+    src/SmtpMime
 
 OTHER_FILES += \
-    demos/demo2/printscreen.png \
     LICENSE \
     README.md
 
-FORMS += \
-    demos/demo2/sendemail.ui
+FORMS +=
