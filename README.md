@@ -74,6 +74,8 @@ Lets see a simple example:
     }
 
 
+For more examples see the [Wiki/Examples](https://github.com/bluetiger9/SmtpClient-for-Qt/wiki/Examples).
+
 ## License
 
 This project (all files including the demos/examples) is licensed under the GNU GPL version 2.0.
