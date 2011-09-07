@@ -80,4 +80,8 @@ For more examples see the [Wiki/Examples](https://github.com/bluetiger9/SmtpClie
 
 This project (all files including the demos/examples) is licensed under the GNU GPL version 2.0.
 
+## Sample Email sended with the SmtpClient
+
+![Html email with images](http://imagerz.com/QEEXDUtvAwMGVVtPFQVQ)
+
 **Copyright (c) 2011 - Tőkés Attila**
