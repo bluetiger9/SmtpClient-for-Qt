@@ -24,55 +24,55 @@ The SmtpClient for Qt is small library writen for Qt 4 (C++ version) that allows
 
 Lets see a simple example:
 
+```c++
+#include <QtGui/QApplication>
+#include "../src/SmtpMime"
 
-    #include <QtGui/QApplication>
-    #include "../src/SmtpMime"
+int main(int argc, char *argv[])
+{
+    QApplication a(argc, argv);
 
-    int main(int argc, char *argv[])
-    {
-        QApplication a(argc, argv);
+    // This is a first demo application of the SmtpClient for Qt project
 
-        // This is a first demo application of the SmtpClient for Qt project
+    // First we need to create an SmtpClient object
+    // We will use the Gmail's smtp server (smtp.gmail.com, port 465, ssl)
 
-        // First we need to create an SmtpClient object
-        // We will use the Gmail's smtp server (smtp.gmail.com, port 465, ssl)
+    SmtpClient smtp("smtp.gmail.com", 465, SmtpClient::SslConnection);
 
-        SmtpClient smtp("smtp.gmail.com", 465, SmtpClient::SslConnection);
+    // We need to set the username (your email address) and the password
+    // for smtp authentification.
 
-        // We need to set the username (your email address) and the password
-        // for smtp authentification.
+    smtp.setUser("your_email_address@gmail.com");
+    smtp.setPassword("your_password");
 
-        smtp.setUser("your_email_address@gmail.com");
-        smtp.setPassword("your_password");
+    // Now we create a MimeMessage object. This will be the email.
 
-        // Now we create a MimeMessage object. This will be the email.
+    MimeMessage message;
 
-        MimeMessage message;
+    message.setSender(new EmailAddress("your_email_address@gmail.com", "Your Name"));
+    message.addRecipient(new EmailAddress("recipient@host.com", "Recipient's Name"));
+    message.setSubject("SmtpClient for Qt - Demo");
 
-        message.setSender(new EmailAddress("your_email_address@gmail.com", "Your Name"));
-        message.addRecipient(new EmailAddress("recipient@host.com", "Recipient's Name"));
-        message.setSubject("SmtpClient for Qt - Demo");
+    // Now add some text to the email.
+    // First we create a MimeText object.
 
-        // Now add some text to the email.
-        // First we create a MimeText object.
+    MimeText text;
 
-        MimeText text;
+    text.setText("Hi,\nThis is a simple email message.\n");
 
-        text.setText("Hi,\nThis is a simple email message.\n");
+    // Now add it to the mail
 
-        // Now add it to the mail
+    message.addPart(&text);
 
-        message.addPart(&text);
+    // Now we can send the mail
 
-        // Now we can send the mail
+    smtp.connectToHost();
+    smtp.login();
+    smtp.sendMail(message);
+    smtp.quit();
 
-        smtp.connectToHost();
-        smtp.login();
-        smtp.sendMail(message);
-        smtp.quit();
-
-    }
-
+}
+```
 
 For more examples see the [Wiki/Examples](https://github.com/bluetiger9/SmtpClient-for-Qt/wiki/Examples).
 
