@@ -26,7 +26,7 @@ public:
 
     /* [1] Constructors and Destructors */
 
-    MimeHtml();
+    MimeHtml(const QString &html = "");
     ~MimeHtml();
 
     /* [1] --- */

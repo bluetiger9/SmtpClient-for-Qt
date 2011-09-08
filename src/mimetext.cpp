@@ -18,8 +18,9 @@
 
 /* [1] Constructors and Destructors */
 
-MimeText::MimeText()
+MimeText::MimeText(const QString &text)
 {
+    this->text = text;
     this->charset = "utf-8";
     this->encoding = PlainText;
 }

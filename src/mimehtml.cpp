@@ -18,9 +18,9 @@
 
 /* [1] Constructors and Destructors */
 
-MimeHtml::MimeHtml()
+MimeHtml::MimeHtml(const QString &html)
 {
-    this->html = "";
+    this->html = html;
     this->encoding = PlainText;
     this->charset = "utf-8";
 }
