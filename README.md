@@ -8,7 +8,7 @@ The SmtpClient for Qt is small library writen for Qt 4 (C++ version) that allows
 
 - TCP and SSL connections to SMTP servers
 
-- SMTP authentification (PLAIN and LOGIN methods)
+- SMTP authentication (PLAIN and LOGIN methods)
 
 - sending MIME emails (to multiple recipients)
 
@@ -16,7 +16,7 @@ The SmtpClient for Qt is small library writen for Qt 4 (C++ version) that allows
 
 - multiple attachments and inline files (used in HTML)
 
-- diferent character sets (ascii, utf-8, etc) and encoding methods (7bit, 8bit, base64)
+- different character sets (ascii, utf-8, etc) and encoding methods (7bit, 8bit, base64)
 
 - error handling
 
