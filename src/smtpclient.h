@@ -40,7 +40,7 @@ public:
     {
         ConnectionTimeoutError,
         ResponseTimeoutError,
-        AuthentificationFailedError,
+        AuthenticationFailedError,
         ServerError,    // 4xx smtp error
         ClientError     // 5xx smtp error
     };

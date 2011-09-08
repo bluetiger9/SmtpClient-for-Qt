@@ -197,10 +197,10 @@ bool SmtpClient::login(const QString &user, const QString &password, AuthMethod 
             // Wait for the server's response
             waitForResponse();
 
-            // If the response is not 235 then the authification was faild
+            // If the response is not 235 then the authentication was faild
             if (responseCode != 235)
             {
-                emit smtpError(AuthentificationFailedError);
+                emit smtpError(AuthenticationFailedError);
                 return false;
             }
         }
@@ -211,14 +211,14 @@ bool SmtpClient::login(const QString &user, const QString &password, AuthMethod 
 
             // Wait for 334 response code
             waitForResponse();
-            if (responseCode != 334) { emit smtpError(AuthentificationFailedError); return false; }
+            if (responseCode != 334) { emit smtpError(AuthenticationFailedError); return false; }
 
             // Send the username in base64
             sendMessage(QByteArray().append(user).toBase64());
 
             // Wait for 334
             waitForResponse();
-            if (responseCode != 334) { emit smtpError(AuthentificationFailedError); return false; }
+            if (responseCode != 334) { emit smtpError(AuthenticationFailedError); return false; }
 
             // Send the password in base64
             sendMessage(QByteArray().append(password).toBase64());
@@ -226,10 +226,10 @@ bool SmtpClient::login(const QString &user, const QString &password, AuthMethod 
             // Wait for the server's responce
             waitForResponse();
 
-            // If the response is not 235 then the authification was faild
+            // If the response is not 235 then the authentication was faild
             if (responseCode != 235)
             {
-                emit smtpError(AuthentificationFailedError);
+                emit smtpError(AuthenticationFailedError);
                 return false;
             }
         }
@@ -237,7 +237,7 @@ bool SmtpClient::login(const QString &user, const QString &password, AuthMethod 
     catch (ResponseTimeoutException e)
     {
         // Responce Timeout exceeded
-        emit smtpError(AuthentificationFailedError);
+        emit smtpError(AuthenticationFailedError);
         return false;
     }
 
