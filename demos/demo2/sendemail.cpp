@@ -19,6 +19,7 @@
 
 #include <QFileDialog>
 #include <QErrorMessage>
+#include <QMessageBox>
 
 #include <iostream>
 
@@ -118,6 +119,12 @@ void SendEmail::on_sendEmail_clicked()
     {
         errorMessage("Mail sending failed");
         return;
+    }
+    else
+    {
+        QMessageBox okMessage (this);
+        okMessage.setText("The email was succesfully sended.");
+        okMessage.exec();
     }
 
     smtp.quit();

@@ -95,7 +95,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Use authentification</string>
+           <string>Use authentication</string>
           </property>
          </widget>
         </item>
