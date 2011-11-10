@@ -65,6 +65,7 @@ const QString& MimePart::getContent() const
 QString MimePart::toString()
 {
     prepare();
+
     return header + "\n" + content;
 }
 

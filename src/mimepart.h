@@ -27,12 +27,11 @@ public:
     /* [0] Enumerations */
 
     enum Encoding {
-        PlainText,
         Base64,
         _7Bit,
-        _8Bit,
-        QuotedPrintable // not implemented
+        _8Bit
     };
+
 
     /* [0] --- */
 
