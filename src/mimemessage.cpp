@@ -54,6 +54,11 @@ void MimeMessage::addPart(MimePart *part)
     this->parts << part;
 }
 
+void MimeMessage::useBase64InHeaders(bool use)
+{
+    this->base64headers = use;
+}
+
 const EmailAddress & MimeMessage::getSender() const
 {
     return *sender;
@@ -82,13 +87,25 @@ const QList<MimePart*> & MimeMessage::getParts() const
 QString MimeMessage::toString()
 {
     QString mime;
-    mime = "From: " + sender->getName() + " <" + sender->getAddress() + ">\n";
+    mime = "From: ";
+    mime += (base64headers) ? ("=?utf-8?B?" + QByteArray().append(sender->getName()).toBase64() + "?=")
+                            : sender->getName();
+    mime += " <" + sender->getAddress() + ">\n";
+
 
     QList<EmailAddress*>::iterator it;
     for (it = recipients.begin(); it != recipients.end(); ++it)
-        mime += "To: " + (*it)->getName() + " <" + (*it)->getAddress() + ">\n";
+    {
+        mime += "To: ";
+        mime += (base64headers) ? ("=?utf-8?B?" + QByteArray().append((*it)->getName()).toBase64() + "?=")
+                                : (*it)->getName();
+        mime += " <" + (*it)->getAddress() + ">\n";
+    }
 
-    mime += "Subject: " + subject + "\n";
+    mime += "Subject: ";
+    mime += (base64headers) ? ("=?utf-8?B?" + QByteArray().append(subject).toBase64() + "?=")
+                           : subject;
+    mime += "\n";
 
     QString boundary = "----MIME-part-boundary=" + QByteArray().append(QDateTime::currentDateTime().toString()).toBase64() + "-end";
 

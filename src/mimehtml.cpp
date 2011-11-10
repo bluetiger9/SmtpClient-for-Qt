@@ -21,7 +21,7 @@
 MimeHtml::MimeHtml(const QString &html)
 {
     this->html = html;
-    this->encoding = PlainText;
+    this->encoding = _7Bit;
     this->charset = "utf-8";
 }
 
@@ -73,9 +73,22 @@ void MimeHtml::prepare()
             + this->charset + "\n";
 
     this->header += "Content-Transfer-Encoding: ";
-    this->header += (this->encoding == PlainText) ? "7bit\n" : "base64\n";
 
-    this->content = (this->encoding == PlainText) ? this->html.toAscii() : QByteArray().append(this->html).toBase64();
+    switch (encoding)
+    {
+    case _7Bit:
+        header += "7bit\n";
+        content = this->html.toAscii();
+        break;
+    case _8Bit:
+        header += "8bit\n";
+        content = this->html.toUtf8();
+        break;
+    case Base64:
+        header += "base64\n";
+        content = QByteArray().append(this->html).toBase64();
+    }
+
     this->content += "\n";
 }
 

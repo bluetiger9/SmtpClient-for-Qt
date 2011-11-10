@@ -22,7 +22,7 @@ MimeText::MimeText(const QString &text)
 {
     this->text = text;
     this->charset = "utf-8";
-    this->encoding = PlainText;
+    this->encoding = _7Bit;
 }
 
 MimeText::~MimeText() { }
@@ -69,13 +69,26 @@ const QString & MimeText::getCharset() const
 
 void MimeText::prepare()
 {
-    this->header = "Content-Type: text/plain; charset: "
+    this->header = "Content-Type: text/plain; charset="
             + this->charset + "\n";
 
     this->header += "Content-Transfer-Encoding: ";
-    this->header += (this->encoding == PlainText) ? "7bit\n" : "base64\n";
 
-    this->content = (this->encoding == PlainText) ? this->text.toAscii() : QByteArray().append(this->text).toBase64();
+    switch (encoding)
+    {
+    case _7Bit:
+        header += "7bit\n";
+        content = this->text.toAscii();
+        break;
+    case _8Bit:
+        header += "8bit\n";
+        content = this->text.toUtf8();
+        break;
+    case Base64:
+        header += "base64\n";
+        content = QByteArray().append(this->text).toBase64();
+    }
+
     this->content += "\n";
 
 }
