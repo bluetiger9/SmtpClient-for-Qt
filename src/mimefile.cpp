@@ -23,8 +23,9 @@
 MimeFile::MimeFile(QFile *file)
 {
     this->file = file;
-    this->type = "application/octet-stream";
-    this->name = QFileInfo(*file).fileName();
+    this->cType = "application/octet-stream";
+    this->cName = QFileInfo(*file).fileName();
+    this->cEncoding = Base64;
 }
 
 MimeFile::~MimeFile()
@@ -36,26 +37,6 @@ MimeFile::~MimeFile()
 
 /* [2] Getters and setters */
 
-void MimeFile::setName(const QString & name)
-{
-    this->name = name;
-}
-
-void MimeFile::setType(const QString & type)
-{
-    this->type = type;
-}
-
-const QString & MimeFile::getName() const
-{
-    return name;
-}
-
-const QString & MimeFile::getType() const
-{
-    return type;
-}
-
 /* [2] --- */
 
 
@@ -63,12 +44,12 @@ const QString & MimeFile::getType() const
 
 void MimeFile::prepare()
 {
-    this->header = "Content-Type: " + type + "; name=" + name + "\n";
-    this->header += "Content-Transfer-Encoding: base64\n";
-
     file->open(QIODevice::ReadOnly);
-    this->content = file->readAll().toBase64() + "\n";
+    this->content = file->readAll();
     file->close();
+
+    /* !!! IMPORTANT !!!! */
+    MimePart::prepare();
 }
 
 /* [3] --- */

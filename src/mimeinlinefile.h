@@ -33,16 +33,11 @@ public:
 
     /* [2] Getters and Setters */
 
-    void setContentId(const QString & cid);
-    const QString & getContentId() const;
-
     /* [2] --- */
 
 protected:
 
     /* [3] Protected members */
-
-    QString cid;
 
     /* [3] --- */
 

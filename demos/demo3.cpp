@@ -25,19 +25,18 @@ int main(int argc, char *argv[])
 
     SmtpClient smtp("smtp.gmail.com", 465, SmtpClient::SslConnection);
 
-    smtp.setUser("your_email_address@gmail.com");
+    smtp.setUser("your_email@gmail.com");
     smtp.setPassword("your_password");
 
     // Create a MimeMessage
 
     MimeMessage message;
 
-    message.setSender(new EmailAddress("your_email_address@gmail.com", "Your Name"));
+    message.setSender(new EmailAddress("your_email@gmail.com", "Your Name"));
     message.addRecipient(new EmailAddress("recipient@host.com", "Recipient's Name"));
     message.setSubject("SmtpClient for Qt - Demo");
 
     // Add some text
-
     MimeText text;
     text.setText("Hi!\n This is an email with some attachments.");
     message.addPart(&text);
@@ -46,7 +45,7 @@ int main(int argc, char *argv[])
     MimeAttachment attachment (new QFile("image1.jpg"));
 
     // the file type can be setted. (by default is application/octet-stream)
-    attachment.setType("image/jpg");
+    attachment.setContentType("image/jpg");
 
     // Now add it to message
     message.addPart(&attachment);

@@ -15,11 +15,14 @@
 */
 
 #include "mimepart.h"
+#include "quotedprintable.h"
 
 /* [1] Constructors and Destructors */
 
 MimePart::MimePart()
 {
+    cEncoding = _7Bit;
+    prepared = false;
 }
 
 MimePart::~MimePart()
@@ -32,7 +35,7 @@ MimePart::~MimePart()
 
 /* [2] Getters and Setters */
 
-void MimePart::setContent(const QString & content)
+void MimePart::setContent(const QByteArray & content)
 {
     this->content = content;
 }
@@ -52,9 +55,59 @@ const QString& MimePart::getHeader() const
     return header;
 }
 
-const QString& MimePart::getContent() const
+const QByteArray& MimePart::getContent() const
 {
     return content;
+}
+
+void MimePart::setContentId(const QString & cId)
+{
+    this->cId = cId;
+}
+
+const QString & MimePart::getContentId() const
+{
+    return this->cId;
+}
+
+void MimePart::setContentName(const QString & cName)
+{
+    this->cName = cName;
+}
+
+const QString & MimePart::getContentName() const
+{
+    return this->cName;
+}
+
+void MimePart::setContentType(const QString & cType)
+{
+    this->cType = cType;
+}
+
+const QString & MimePart::getContentType() const
+{
+    return this->cType;
+}
+
+void MimePart::setCharset(const QString & charset)
+{
+    this->cCharset = charset;
+}
+
+const QString & MimePart::getCharset() const
+{
+    return this->cCharset;
+}
+
+void MimePart::setEncoding(Encoding enc)
+{
+    this->cEncoding = enc;
+}
+
+MimePart::Encoding MimePart::getEncoding() const
+{
+    return this->cEncoding;
 }
 
 /* [2] --- */
@@ -64,9 +117,10 @@ const QString& MimePart::getContent() const
 
 QString MimePart::toString()
 {
-    prepare();
+    if (!prepared)
+        prepare();
 
-    return header + "\n" + content;
+    return mimeString;
 }
 
 /* [3] --- */
@@ -74,6 +128,75 @@ QString MimePart::toString()
 
 /* [4] Protected methods */
 
-void MimePart::prepare() {}
+void MimePart::prepare()
+{
+    mimeString = QString();
+
+    /* === Header Prepare === */
+
+    /* Content-Type */
+    mimeString.append("Content-Type: ").append(cType);
+
+    if (cName != "")
+        mimeString.append("; name=\"").append(cName).append("\"");
+
+    if (cCharset != "")
+        mimeString.append("; charset=").append(cCharset);
+
+    mimeString.append("\n");
+    /* ------------ */
+
+    /* Content-Transfer-Encoding */
+    mimeString.append("Content-Transfer-Encoding: ");
+    switch (cEncoding)
+    {
+    case _7Bit:
+        mimeString.append("7bit\n");
+        break;
+    case _8Bit:
+        mimeString.append("8bit\n");
+        break;
+    case Base64:
+        mimeString.append("base64\n");
+        break;
+    case QuotedPrintable:
+        mimeString.append("quoted-printable\n");
+        break;
+    }
+    /* ------------------------ */
+
+    /* Content-Id */
+    if (cId != NULL)
+        mimeString.append("Content-ID: <").append(cId).append(">\n");
+    /* ---------- */
+
+
+    /* ------------------------- */
+
+    mimeString.append(header).append("\n");
+
+    /* === End of Header Prepare === */
+
+    /* === Content Encoding === */
+    switch (cEncoding)
+    {
+    case _7Bit:
+        mimeString.append(QString(content).toAscii());
+        break;
+    case _8Bit:
+        mimeString.append(content);
+        break;
+    case Base64:
+        mimeString.append(content.toBase64());
+        break;
+    case QuotedPrintable:
+        mimeString.append(QuotedPrintable::encode(content));
+        break;
+    }
+    mimeString.append("\n");
+    /* === End of Content Encoding === */
+
+    prepared = true;
+}
 
 /* [4] --- */
