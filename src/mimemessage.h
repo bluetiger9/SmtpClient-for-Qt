@@ -40,7 +40,7 @@ public:
     void setSubject(const QString & subject);
     void addPart(MimePart* part);
 
-    void useBase64InHeaders(bool use);
+    void setHeaderEncoding(MimePart::Encoding);
 
     const EmailAddress & getSender() const;
     const QList<EmailAddress*> & getRecipients() const;
@@ -65,7 +65,7 @@ protected:
     QString subject;
     QList<MimePart*> parts;
 
-    bool base64headers;
+    MimePart::Encoding hEncoding;
 
     /* [4] --- */
 
