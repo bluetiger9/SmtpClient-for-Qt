@@ -52,11 +52,11 @@ int main(int argc, char *argv[])
 
     // An unique content id must be setted
     image1.setContentId("image1");
-    image1.setType("image/jpg");
+    image1.setContentType("image/jpg");
 
     MimeInlineFile image2 (new QFile("image2.jpg"));
     image2.setContentId("image2");
-    image2.setType("image/jpg");
+    image2.setContentType("image/jpg");
 
     message.addPart(&html);
     message.addPart(&image1);

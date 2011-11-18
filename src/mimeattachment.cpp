@@ -35,9 +35,10 @@ MimeAttachment::~MimeAttachment()
 
 void MimeAttachment::prepare()
 {
-    MimeFile::prepare();
+    this->header += "Content-disposition: attachment\n";
 
-    this->header += "Content-disposition: attachment;\n";
+    /* !!! IMPORTANT !!! */
+    MimeFile::prepare();
 }
 
 /* [2] --- */

@@ -25,11 +25,11 @@ class MimePart : public QObject
 public:
 
     /* [0] Enumerations */
-
-    enum Encoding {
-        Base64,
+    enum Encoding {        
         _7Bit,
-        _8Bit
+        _8Bit,
+        Base64,
+        QuotedPrintable
     };
 
 
@@ -47,12 +47,27 @@ public:
     /* [2] Getters and Setters */
 
     const QString& getHeader() const;
-    const QString& getContent() const;
+    const QByteArray& getContent() const;
 
-    void setContent(const QString & content);
+    void setContent(const QByteArray & content);
     void setHeader(const QString & header);
 
     void addHeaderLine(const QString & line);
+
+    void setContentId(const QString & cId);
+    const QString & getContentId() const;
+
+    void setContentName(const QString & cName);
+    const QString & getContentName() const;
+
+    void setContentType(const QString & cType);
+    const QString & getContentType() const;
+
+    void setCharset(const QString & charset);
+    const QString & getCharset() const;
+
+    void setEncoding(Encoding enc);
+    Encoding getEncoding() const;
 
     /* [2] --- */
 
@@ -61,23 +76,29 @@ public:
 
     QString toString();
 
+    virtual void prepare();
+
     /* [3] --- */
+
+
 
 protected:
 
     /* [4] Protected members */
 
     QString header;
-    QString content;
+    QByteArray content;
+
+    QString cId;
+    QString cName;
+    QString cType;
+    QString cCharset;
+    Encoding cEncoding;
+
+    QString mimeString;
+    bool prepared;
 
     /* [4] --- */
-
-
-    /* [5] Protected methods */
-
-    virtual void prepare();
-
-    /* [5] --- */
 };
 
 #endif // MIMEPART_H
