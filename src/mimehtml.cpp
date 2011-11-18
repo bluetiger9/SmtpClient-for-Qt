@@ -18,11 +18,9 @@
 
 /* [1] Constructors and Destructors */
 
-MimeHtml::MimeHtml(const QString &html)
+MimeHtml::MimeHtml(const QString &html) : MimeText(html)
 {
-    this->html = html;
-    this->encoding = _7Bit;
-    this->charset = "utf-8";
+    this->cType = "text/html";
 }
 
 MimeHtml::~MimeHtml() {}
@@ -34,33 +32,14 @@ MimeHtml::~MimeHtml() {}
 
 void MimeHtml::setHtml(const QString & html)
 {
-    this->html = html;
-}
-
-void MimeHtml::setEncoding(MimePart::Encoding enc)
-{
-    this->encoding = enc;
-}
-
-void MimeHtml::setCharset(const QString & charset)
-{
-    this->charset = charset;
+    this->text = html;
 }
 
 const QString & MimeHtml::getHtml() const
 {
-    return html;
+    return text;
 }
 
-const QString & MimeHtml::getCharset() const
-{
-    return charset;
-}
-
-MimePart::Encoding MimeHtml::getEncoding() const
-{
-    return encoding;
-}
 
 /* [2] --- */
 
@@ -69,27 +48,8 @@ MimePart::Encoding MimeHtml::getEncoding() const
 
 void MimeHtml::prepare()
 {
-    this->header = "Content-Type: text/html; charset="
-            + this->charset + "\n";
-
-    this->header += "Content-Transfer-Encoding: ";
-
-    switch (encoding)
-    {
-    case _7Bit:
-        header += "7bit\n";
-        content = this->html.toAscii();
-        break;
-    case _8Bit:
-        header += "8bit\n";
-        content = this->html.toUtf8();
-        break;
-    case Base64:
-        header += "base64\n";
-        content = QByteArray().append(this->html).toBase64();
-    }
-
-    this->content += "\n";
+    /* !!! IMPORTANT !!! */
+    MimeText::prepare();
 }
 
 /* [3] --- */

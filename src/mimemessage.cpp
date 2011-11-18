@@ -17,6 +17,7 @@
 #include "mimemessage.h"
 
 #include <QDateTime>
+#include "quotedprintable.h"
 
 /* [1] Constructors and Destructors */
 
@@ -54,9 +55,9 @@ void MimeMessage::addPart(MimePart *part)
     this->parts << part;
 }
 
-void MimeMessage::useBase64InHeaders(bool use)
+void MimeMessage::setHeaderEncoding(MimePart::Encoding hEnc)
 {
-    this->base64headers = use;
+    this->hEncoding = hEnc;
 }
 
 const EmailAddress & MimeMessage::getSender() const
@@ -87,24 +88,69 @@ const QList<MimePart*> & MimeMessage::getParts() const
 QString MimeMessage::toString()
 {
     QString mime;
-    mime = "From: ";
-    mime += (base64headers) ? ("=?utf-8?B?" + QByteArray().append(sender->getName()).toBase64() + "?=")
-                            : sender->getName();
+
+    /* =========== MIME HEADER ============ */
+
+    /* ---------- Sender / From ----------- */
+    mime = "From:";
+    if (sender->getName() != "")
+    {
+        switch (hEncoding)
+        {
+        case MimePart::Base64:
+            mime += " =?utf-8?B?" + QByteArray().append(sender->getName()).toBase64() + "?=";
+            break;
+        case MimePart::QuotedPrintable:
+            mime += " =?utf-8?Q?" + QuotedPrintable::encode(QByteArray().append(sender->getName())).replace(' ', "_").replace(':',"=3A") + "?=";
+            break;
+        default:
+            mime += " " + sender->getName();
+        }
+    }
     mime += " <" + sender->getAddress() + ">\n";
+    /* ---------------------------------- */
 
 
+    /* ------- Recipients / To ---------- */
     QList<EmailAddress*>::iterator it;
     for (it = recipients.begin(); it != recipients.end(); ++it)
     {
-        mime += "To: ";
-        mime += (base64headers) ? ("=?utf-8?B?" + QByteArray().append((*it)->getName()).toBase64() + "?=")
-                                : (*it)->getName();
+        mime += "To:";
+
+        if ((*it)->getName() != "")
+        {
+            switch (hEncoding)
+            {
+            case MimePart::Base64:
+                mime += " =?utf-8?B?" + QByteArray().append((*it)->getName()).toBase64() + "?=";
+                break;
+            case MimePart::QuotedPrintable:
+                mime += " =?utf-8?Q?" + QuotedPrintable::encode(QByteArray().append((*it)->getName())).replace(' ', "_").replace(':',"=3A") + "?=";
+                break;
+            default:
+                mime += " " + (*it)->getName();
+            }
+        }
         mime += " <" + (*it)->getAddress() + ">\n";
     }
+    /* ---------------------------------- */
 
+    /* ------------ Subject ------------- */
     mime += "Subject: ";
-    mime += (base64headers) ? ("=?utf-8?B?" + QByteArray().append(subject).toBase64() + "?=")
-                           : subject;
+
+    switch (hEncoding)
+    {
+    case MimePart::Base64:
+        mime += "=?utf-8?B?" + QByteArray().append(subject).toBase64() + "?=";
+        break;
+    case MimePart::QuotedPrintable:
+        mime += "=?utf-8?Q?" + QuotedPrintable::encode(QByteArray().append(subject)).replace(' ', "_").replace(':',"=3A") + "?=";
+        break;
+    default:
+        mime += subject;
+    }
+    /* ---------------------------------- */
+
     mime += "\n";
 
     QString boundary = "----MIME-part-boundary=" + QByteArray().append(QDateTime::currentDateTime().toString()).toBase64() + "-end";
@@ -112,13 +158,19 @@ QString MimeMessage::toString()
     mime += "MIME-Version: 1.0\n";
     mime += "Content-type: multipart/mixed; boundary=\"" + boundary + "\"\n\n";
 
+    /* ====== END OF MIME HEADER ======== */
+
     boundary = "--" + boundary;
+
+    /* ========== MIME BODY ============= */
 
     QList<MimePart*>::iterator i;
     for (i = parts.begin(); i != parts.end(); ++i)
         mime += boundary + "\n" + (*i)->toString();
 
     mime += boundary + "--\n";
+
+    /* ====== END OF MIME BODY ========= */
 
     return mime;
 }

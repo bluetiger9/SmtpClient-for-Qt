@@ -35,12 +35,6 @@ public:
 
     /* [2] Getters and Setters */
 
-    void setName(const QString & name);
-    void setType(const QString & type);
-
-    const QString & getName() const;
-    const QString & getType() const;
-
     /* [2] --- */
 
 protected:
@@ -48,8 +42,6 @@ protected:
     /* [3] Protected members */
 
     QFile* file;
-    QString name;
-    QString type;
 
     /* [3] --- */
 

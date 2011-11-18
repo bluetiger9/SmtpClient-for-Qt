@@ -17,9 +17,9 @@
 #ifndef MIMEHTML_H
 #define MIMEHTML_H
 
-#include "mimepart.h"
+#include "mimetext.h"
 
-class MimeHtml : public MimePart
+class MimeHtml : public MimeText
 {
     Q_OBJECT
 public:
@@ -35,22 +35,14 @@ public:
     /* [2] Getters and Setters */
 
     void setHtml(const QString & html);
-    void setEncoding(Encoding enc);
-    void setCharset(const QString & charset);
 
     const QString& getHtml() const;
-    const QString& getCharset() const;
-    Encoding getEncoding() const;
 
     /* [2] --- */
 
 protected:
 
     /* [3] Protected members */
-
-    QString html;
-    QString charset;
-    Encoding encoding;
 
     /* [3] --- */
 
