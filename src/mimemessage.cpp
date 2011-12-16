@@ -107,7 +107,7 @@ QString MimeMessage::toString()
             mime += " " + sender->getName();
         }
     }
-    mime += " <" + sender->getAddress() + ">\n";
+    mime += " <" + sender->getAddress() + ">\r\n";
     /* ---------------------------------- */
 
 
@@ -131,7 +131,7 @@ QString MimeMessage::toString()
                 mime += " " + (*it)->getName();
             }
         }
-        mime += " <" + (*it)->getAddress() + ">\n";
+        mime += " <" + (*it)->getAddress() + ">\r\n";
     }
     /* ---------------------------------- */
 
@@ -151,12 +151,12 @@ QString MimeMessage::toString()
     }
     /* ---------------------------------- */
 
-    mime += "\n";
+    mime += "\r\n";
 
     QString boundary = "----MIME-part-boundary=" + QByteArray().append(QDateTime::currentDateTime().toString()).toBase64() + "-end";
 
-    mime += "MIME-Version: 1.0\n";
-    mime += "Content-type: multipart/mixed; boundary=\"" + boundary + "\"\n\n";
+    mime += "MIME-Version: 1.0\r\n";
+    mime += "Content-type: multipart/mixed; boundary=\"" + boundary + "\"\r\n\r\n";
 
     /* ====== END OF MIME HEADER ======== */
 
@@ -166,9 +166,9 @@ QString MimeMessage::toString()
 
     QList<MimePart*>::iterator i;
     for (i = parts.begin(); i != parts.end(); ++i)
-        mime += boundary + "\n" + (*i)->toString();
+        mime += boundary + "\r\n" + (*i)->toString();
 
-    mime += boundary + "--\n";
+    mime += boundary + "--\r\n";
 
     /* ====== END OF MIME BODY ========= */
 

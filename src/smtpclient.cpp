@@ -272,7 +272,7 @@ bool SmtpClient::sendMail(MimeMessage& email)
 
         sendMessage(email.toString());
 
-        // Send \n.\n to end the mail data
+        // Send \r\n.\r\n to end the mail data
         sendMessage(".");
 
         waitForResponse();

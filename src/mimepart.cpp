@@ -143,7 +143,7 @@ void MimePart::prepare()
     if (cCharset != "")
         mimeString.append("; charset=").append(cCharset);
 
-    mimeString.append("\n");
+    mimeString.append("\r\n");
     /* ------------ */
 
     /* Content-Transfer-Encoding */
@@ -151,29 +151,29 @@ void MimePart::prepare()
     switch (cEncoding)
     {
     case _7Bit:
-        mimeString.append("7bit\n");
+        mimeString.append("7bit\r\n");
         break;
     case _8Bit:
-        mimeString.append("8bit\n");
+        mimeString.append("8bit\r\n");
         break;
     case Base64:
-        mimeString.append("base64\n");
+        mimeString.append("base64\r\n");
         break;
     case QuotedPrintable:
-        mimeString.append("quoted-printable\n");
+        mimeString.append("quoted-printable\r\n");
         break;
     }
     /* ------------------------ */
 
     /* Content-Id */
     if (cId != NULL)
-        mimeString.append("Content-ID: <").append(cId).append(">\n");
+        mimeString.append("Content-ID: <").append(cId).append(">\r\n");
     /* ---------- */
 
 
     /* ------------------------- */
 
-    mimeString.append(header).append("\n");
+    mimeString.append(header).append("\r\n");
 
     /* === End of Header Prepare === */
 
@@ -193,7 +193,7 @@ void MimePart::prepare()
         mimeString.append(QuotedPrintable::encode(content));
         break;
     }
-    mimeString.append("\n");
+    mimeString.append("\r\n");
     /* === End of Content Encoding === */
 
     prepared = true;
