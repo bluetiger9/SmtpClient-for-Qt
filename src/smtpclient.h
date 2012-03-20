@@ -71,6 +71,9 @@ public:
     int getPort() const;
     void setPort(int port);
 
+    const QString& getName() const;
+    void setName(const QString &name);
+
     ConnectionType getConnectionType() const;
     void setConnectionType(ConnectionType ct);
 
@@ -97,6 +100,7 @@ public:
 
     void quit();
 
+
     /* [3] --- */
 
 protected:
@@ -108,6 +112,7 @@ protected:
     QString host;
     int port;
     bool useSsl;
+    QString name;
 
     QString user;
     QString password;
@@ -118,6 +123,7 @@ protected:
 
     QString responseText;
     int responseCode;
+
 
     class ResponseTimeoutException {};
 

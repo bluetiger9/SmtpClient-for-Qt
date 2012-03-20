@@ -49,7 +49,7 @@ protected:
 
     /* [4] Protected methods */
 
-    void prepare();
+    virtual void prepare();
 
     /* [4] --- */
 };

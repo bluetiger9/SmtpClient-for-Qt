@@ -23,6 +23,7 @@
 /* [1] Constructors and destructors */
 
 SmtpClient::SmtpClient(const QString & host, int port, ConnectionType ct) :
+    name("localhost"),
     authMethod(AuthPlain),
     connectionTimeout(5000),
     responseTimeout(5000)
@@ -126,6 +127,16 @@ SmtpClient::ConnectionType SmtpClient::getConnectionType() const
         return TcpConnection;
 }
 
+const QString& SmtpClient::getName() const
+{
+    return this->name;
+}
+
+void SmtpClient::setName(const QString &name)
+{
+    this->name = name;
+}
+
 /* [2] --- */
 
 
@@ -160,7 +171,7 @@ bool SmtpClient::connectToHost()
 
         // Send a EHLO/HELO message to the server
         // The client's first command must be EHLO/HELO
-        sendMessage("EHLO SmtpClient for Qt/C++");
+        sendMessage("EHLO " + name);
 
         // Wait for the server's response
         waitForResponse();

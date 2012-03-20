@@ -52,7 +52,7 @@ public:
 
     /* [3] Public methods */
 
-    QString toString();
+    virtual QString toString();
 
     /* [3] --- */
 

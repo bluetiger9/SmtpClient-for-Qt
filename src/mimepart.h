@@ -74,7 +74,7 @@ public:
 
     /* [3] Public methods */
 
-    QString toString();
+    virtual QString toString();
 
     virtual void prepare();
 

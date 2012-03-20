@@ -21,7 +21,8 @@
 
 /* [1] Constructors and Destructors */
 
-MimeMessage::MimeMessage()
+MimeMessage::MimeMessage() :
+    hEncoding(MimePart::_8Bit)
 {
 }
 
