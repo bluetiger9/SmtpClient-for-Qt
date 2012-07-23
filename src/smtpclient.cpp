@@ -267,9 +267,32 @@ bool SmtpClient::sendMail(MimeMessage& email)
         if (responseCode != 250) return false;
 
         // Send RCPT command for each recipient
-        for (int i = 0; i < email.getRecipients().size(); ++i)
+        QList<EmailAddress*>::const_iterator it, itEnd;
+        // To (primary recipients)
+        for (it = email.getRecipients().begin(), itEnd = email.getRecipients().end();
+             it != itEnd; ++it)
         {
-            sendMessage("RCPT TO: <" + email.getRecipients().at(i)->getAddress() + ">");
+            sendMessage("RCPT TO: <" + (*it)->getAddress() + ">");
+            waitForResponse();
+
+            if (responseCode != 250) return false;
+        }
+
+        // Cc (carbon copy)
+        for (it = email.getRecipients(MimeMessage::Cc).begin(), itEnd = email.getRecipients(MimeMessage::Cc).end();
+             it != itEnd; ++it)
+        {
+            sendMessage("RCPT TO: <" + (*it)->getAddress() + ">");
+            waitForResponse();
+
+            if (responseCode != 250) return false;
+        }
+
+        // Bcc (blind carbon copy)
+        for (it = email.getRecipients(MimeMessage::Bcc).begin(), itEnd = email.getRecipients(MimeMessage::Bcc).end();
+             it != itEnd; ++it)
+        {
+            sendMessage("RCPT TO: <" + (*it)->getAddress() + ">");
             waitForResponse();
 
             if (responseCode != 250) return false;
