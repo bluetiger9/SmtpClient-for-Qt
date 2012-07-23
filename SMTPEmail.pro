@@ -19,7 +19,11 @@ SOURCES += \
     src/mimemessage.cpp \
     src/mimepart.cpp \
     src/mimetext.cpp \
-    src/smtpclient.cpp
+    src/smtpclient.cpp \
+    src/quotedprintable.cpp \
+    src/mimemultipart.cpp \
+    test.cpp \
+    src/mimecontentformatter.cpp
 
 HEADERS  += \
     src/emailaddress.h \
@@ -31,7 +35,10 @@ HEADERS  += \
     src/mimepart.h \
     src/mimetext.h \
     src/smtpclient.h \
-    src/SmtpMime
+    src/SmtpMime \
+    src/quotedprintable.h \
+    src/mimemultipart.h \
+    src/mimecontentformatter.h
 
 OTHER_FILES += \
     LICENSE \

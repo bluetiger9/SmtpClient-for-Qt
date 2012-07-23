@@ -18,6 +18,7 @@
 #define MIMEPART_H
 
 #include <QObject>
+#include "mimecontentformatter.h"
 
 class MimePart : public QObject
 {
@@ -93,10 +94,13 @@ protected:
     QString cName;
     QString cType;
     QString cCharset;
+    QString cBoundary;
     Encoding cEncoding;
 
     QString mimeString;
     bool prepared;
+
+    MimeContentFormatter formatter;
 
     /* [4] --- */
 };
