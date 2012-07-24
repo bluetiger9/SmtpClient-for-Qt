@@ -50,7 +50,8 @@ public:
     enum ConnectionType
     {
         TcpConnection,
-        SslConnection
+        SslConnection,
+        TlsConnection       // STARTTLS
     };
 
     /* [0] --- */
@@ -88,6 +89,12 @@ public:
     SmtpClient::AuthMethod getAuthMethod() const;
     void setAuthMethod(AuthMethod method);
 
+    const QString & getResponseText() const;
+    int getResponseCode() const;
+
+    QTcpSocket* getSocket();
+
+
     /* [2] --- */
 
 
@@ -113,7 +120,7 @@ protected:
 
     QString host;
     int port;
-    bool useSsl;
+    ConnectionType connectionType;
     QString name;
 
     QString user;
