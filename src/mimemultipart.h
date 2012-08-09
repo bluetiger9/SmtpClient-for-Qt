@@ -67,7 +67,6 @@ protected:
     QList< MimePart* > parts;
 
     MultiPartType type;
-
     
 };
 

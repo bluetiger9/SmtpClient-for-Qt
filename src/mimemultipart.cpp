@@ -36,7 +36,6 @@ MimeMultiPart::MimeMultiPart(MultiPartType type)
     this->cType = MULTI_PART_NAMES[this->type];
     this->cEncoding = _8Bit;
 
-    qsrand(QTime::currentTime().msec());
     QCryptographicHash md5(QCryptographicHash::Md5);
     md5.addData(QByteArray().append(qrand()));
     cBoundary = md5.result().toHex();
@@ -71,6 +70,7 @@ void MimeMultiPart::prepare() {
 
 void MimeMultiPart::setMimeType(const MultiPartType type) {
     this->type = type;
+    this->cType = MULTI_PART_NAMES[type];
 }
 
 MimeMultiPart::MultiPartType MimeMultiPart::getMimeType() const {

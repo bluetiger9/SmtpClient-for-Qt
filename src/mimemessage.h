@@ -59,6 +59,8 @@ public:
     const QString & getSubject() const;
     const QList<MimePart*> & getParts() const;
 
+    MimePart& getContent();
+    void setContent(MimePart *content);
     /* [2] --- */
 
 

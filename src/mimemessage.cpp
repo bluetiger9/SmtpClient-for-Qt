@@ -33,13 +33,19 @@ MimeMessage::MimeMessage(bool createAutoMimeContent) :
 
 MimeMessage::~MimeMessage()
 {
-
 }
 
 /* [1] --- */
 
 
 /* [2] Getters and Setters */
+MimePart& MimeMessage::getContent() {
+    return *content;
+}
+
+void MimeMessage::setContent(MimePart *content) {
+    this->content = content;
+}
 
 void MimeMessage::setSender(EmailAddress* e)
 {
