@@ -68,3 +68,11 @@ void MimeMultiPart::prepare() {
 
     MimePart::prepare();
 }
+
+void MimeMultiPart::setMimeType(const MultiPartType type) {
+    this->type = type;
+}
+
+MimeMultiPart::MultiPartType MimeMultiPart::getMimeType() const {
+    return type;
+}

@@ -22,7 +22,6 @@ SOURCES += \
     src/smtpclient.cpp \
     src/quotedprintable.cpp \
     src/mimemultipart.cpp \
-    test.cpp \
     src/mimecontentformatter.cpp
 
 HEADERS  += \
