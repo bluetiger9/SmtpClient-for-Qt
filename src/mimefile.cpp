@@ -31,6 +31,7 @@ MimeFile::MimeFile(QFile *file)
 
 MimeFile::~MimeFile()
 {
+    delete file;
 }
 
 /* [1] --- */

@@ -113,6 +113,11 @@ MimePart::Encoding MimePart::getEncoding() const
     return this->cEncoding;
 }
 
+MimeContentFormatter& MimePart::getContentFormatter()
+{
+    return this->formatter;
+}
+
 /* [2] --- */
 
 
