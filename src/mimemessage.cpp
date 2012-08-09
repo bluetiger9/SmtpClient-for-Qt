@@ -191,7 +191,9 @@ QString MimeMessage::toString()
     /* ---------------------------------- */
 
     /* ------- Recipients / Cc ---------- */
-    mime += "Cc:";
+    if (recipientsCc.size() != 0) {
+        mime += "Cc:";
+    }
     for (i = 0, it = recipientsCc.begin(); it != recipientsCc.end(); ++it, ++i)
     {
         if (i != 0) { mime += ","; }
@@ -212,7 +214,9 @@ QString MimeMessage::toString()
         }
         mime += " <" + (*it)->getAddress() + ">";
     }
-    mime += "\r\n";
+    if (recipientsCc.size() != 0) {
+        mime += "\r\n";
+    }
     /* ---------------------------------- */
 
     /* ------------ Subject ------------- */

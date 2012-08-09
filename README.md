@@ -1,7 +1,17 @@
-SMTP Client for Qt (C++) - Development Branch (v. 1.1 beta)
+SMTP Client for Qt (C++) - Version 1.1
 =============================================
 
 The SmtpClient for Qt is small library writen for Qt 4 (C++ version) that allows application to send complex emails (plain text, html, attachments, inline files, etc.) using the Simple Mail Transfer Protocol (SMTP).
+
+##New in version 1.1:
+
+- TLS (STARTTLS) connection is now supported
+
+- multiple types of recipients (to, cc, bcc)
+
+- nested mime emails (mixed/alternative, mixed/related)
+
+- output compilant with RFC2045
 
 
 ## SMPT Client for Qt supports
