@@ -48,6 +48,9 @@ public:
 
     /* [2] Getters and Setters */
 
+    void setMimeType(const MultiPartType type);
+    MultiPartType getMimeType() const;
+
     const QList<MimePart*> & getParts() const;
 
     /* [2] --- */
