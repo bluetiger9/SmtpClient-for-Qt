@@ -1,15 +1,17 @@
 /*
-  Copyright (c) 2011 - Tőkés Attila
+  Copyright (c) 2011-2012 - Tőkés Attila
 
   This file is part of SmtpClient for Qt.
 
-  SmtpClient for Qt is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 2 of the License, or
-  (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-  SmtpClient for Qt is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
   See the LICENSE file for more details.
 */
@@ -23,6 +25,7 @@ MimePart::MimePart()
 {
     cEncoding = _7Bit;
     prepared = false;
+    cBoundary = "";
 }
 
 MimePart::~MimePart()
@@ -47,7 +50,7 @@ void MimePart::setHeader(const QString & header)
 
 void MimePart::addHeaderLine(const QString & line)
 {
-    this->header += line;
+    this->header += line + "\r\n";
 }
 
 const QString& MimePart::getHeader() const
@@ -110,6 +113,11 @@ MimePart::Encoding MimePart::getEncoding() const
     return this->cEncoding;
 }
 
+MimeContentFormatter& MimePart::getContentFormatter()
+{
+    return this->formatter;
+}
+
 /* [2] --- */
 
 
@@ -143,6 +151,9 @@ void MimePart::prepare()
     if (cCharset != "")
         mimeString.append("; charset=").append(cCharset);
 
+    if (cBoundary != "")
+        mimeString.append("; boundary=").append(cBoundary);
+
     mimeString.append("\r\n");
     /* ------------ */
 
@@ -170,14 +181,15 @@ void MimePart::prepare()
         mimeString.append("Content-ID: <").append(cId).append(">\r\n");
     /* ---------- */
 
-
-    /* ------------------------- */
+    /* Addition header lines */
 
     mimeString.append(header).append("\r\n");
 
+    /* ------------------------- */
+
     /* === End of Header Prepare === */
 
-    /* === Content Encoding === */
+    /* === Content === */
     switch (cEncoding)
     {
     case _7Bit:
@@ -187,14 +199,14 @@ void MimePart::prepare()
         mimeString.append(content);
         break;
     case Base64:
-        mimeString.append(content.toBase64());
+        mimeString.append(formatter.format(content.toBase64()));
         break;
     case QuotedPrintable:
-        mimeString.append(QuotedPrintable::encode(content));
+        mimeString.append(formatter.format(QuotedPrintable::encode(content), true));
         break;
     }
     mimeString.append("\r\n");
-    /* === End of Content Encoding === */
+    /* === End of Content === */
 
     prepared = true;
 }
