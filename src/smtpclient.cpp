@@ -1,15 +1,17 @@
 /*
-  Copyright (c) 2011 - Tőkés Attila
+  Copyright (c) 2011-2012 - Tőkés Attila
 
   This file is part of SmtpClient for Qt.
 
-  SmtpClient for Qt is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 2 of the License, or
-  (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-  SmtpClient for Qt is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
   See the LICENSE file for more details.
 */
@@ -22,21 +24,13 @@
 
 /* [1] Constructors and destructors */
 
-SmtpClient::SmtpClient(const QString & host, int port, ConnectionType ct) :
+SmtpClient::SmtpClient(const QString & host, int port, ConnectionType connectionType) :
     name("localhost"),
     authMethod(AuthPlain),
     connectionTimeout(5000),
     responseTimeout(5000)
 {
-    if (ct == TcpConnection)
-        this->useSsl = false;
-    else if (ct == SslConnection)
-        this->useSsl = true;
-
-    if (useSsl == false)
-        socket = new QTcpSocket(this);
-    else
-        socket = new QSslSocket(this);
+    setConnectionType(connectionType);
 
     this->host = host;
     this->port = port;
@@ -83,15 +77,17 @@ void SmtpClient::setPort(int port)
 
 void SmtpClient::setConnectionType(ConnectionType ct)
 {
-    if (ct == TcpConnection)
-        this->useSsl = false;
-    else if (ct == SslConnection)
-        this->useSsl = true;
+    this->connectionType = ct;
 
-    if (useSsl == false)
+    switch (connectionType)
+    {
+    case TcpConnection:
         socket = new QTcpSocket(this);
-    else
+        break;
+    case SslConnection:
+    case TlsConnection:
         socket = new QSslSocket(this);
+    }
 }
 
 const QString& SmtpClient::getHost() const
@@ -121,10 +117,7 @@ int SmtpClient::getPort() const
 
 SmtpClient::ConnectionType SmtpClient::getConnectionType() const
 {
-    if (useSsl)
-        return SslConnection;
-    else
-        return TcpConnection;
+    return connectionType;
 }
 
 const QString& SmtpClient::getName() const
@@ -137,6 +130,20 @@ void SmtpClient::setName(const QString &name)
     this->name = name;
 }
 
+const QString & SmtpClient::getResponseText() const
+{
+    return responseText;
+}
+
+int SmtpClient::getResponseCode() const
+{
+    return responseCode;
+}
+
+QTcpSocket* SmtpClient::getSocket() {
+    return socket;
+}
+
 /* [2] --- */
 
 
@@ -144,10 +151,17 @@ void SmtpClient::setName(const QString &name)
 
 bool SmtpClient::connectToHost()
 {
-    if (useSsl)
-        ((QSslSocket*) socket)->connectToHostEncrypted(host, port);
-    else
+    switch (connectionType)
+    {
+    case TlsConnection:
+    case TcpConnection:
         socket->connectToHost(host, port);
+        break;
+    case SslConnection:
+        ((QSslSocket*) socket)->connectToHostEncrypted(host, port);
+        break;
+
+    }
 
     // Tries to connect to server
     if (!socket->waitForConnected(connectionTimeout))
@@ -177,10 +191,43 @@ bool SmtpClient::connectToHost()
         waitForResponse();
 
         // The response code needs to be 250.
-        if (responseCode != 250)
-        {
+        if (responseCode != 250) {
             emit smtpError(ServerError);
             return false;
+        }
+
+        if (connectionType == TlsConnection) {
+            // send a request to start TLS handshake
+            sendMessage("STARTTLS");
+
+            // Wait for the server's response
+            waitForResponse();
+
+            // The response code needs to be 220.
+            if (responseCode != 220) {
+                emit smtpError(ServerError);
+                return false;
+            };
+
+            ((QSslSocket*) socket)->startClientEncryption();
+
+            if (!((QSslSocket*) socket)->waitForEncrypted(connectionTimeout)) {
+                qDebug() << ((QSslSocket*) socket)->errorString();
+                emit SmtpError(ConnectionTimeoutError);
+                return false;
+            }
+
+            // Send ELHO one more time
+            sendMessage("EHLO " + name);
+
+            // Wait for the server's response
+            waitForResponse();
+
+            // The response code needs to be 250.
+            if (responseCode != 250) {
+                emit smtpError(ServerError);
+                return false;
+            }
         }
     }
     catch (ResponseTimeoutException)
@@ -267,9 +314,32 @@ bool SmtpClient::sendMail(MimeMessage& email)
         if (responseCode != 250) return false;
 
         // Send RCPT command for each recipient
-        for (int i = 0; i < email.getRecipients().size(); ++i)
+        QList<EmailAddress*>::const_iterator it, itEnd;
+        // To (primary recipients)
+        for (it = email.getRecipients().begin(), itEnd = email.getRecipients().end();
+             it != itEnd; ++it)
         {
-            sendMessage("RCPT TO: <" + email.getRecipients().at(i)->getAddress() + ">");
+            sendMessage("RCPT TO: <" + (*it)->getAddress() + ">");
+            waitForResponse();
+
+            if (responseCode != 250) return false;
+        }
+
+        // Cc (carbon copy)
+        for (it = email.getRecipients(MimeMessage::Cc).begin(), itEnd = email.getRecipients(MimeMessage::Cc).end();
+             it != itEnd; ++it)
+        {
+            sendMessage("RCPT TO: <" + (*it)->getAddress() + ">");
+            waitForResponse();
+
+            if (responseCode != 250) return false;
+        }
+
+        // Bcc (blind carbon copy)
+        for (it = email.getRecipients(MimeMessage::Bcc).begin(), itEnd = email.getRecipients(MimeMessage::Bcc).end();
+             it != itEnd; ++it)
+        {
+            sendMessage("RCPT TO: <" + (*it)->getAddress() + ">");
             waitForResponse();
 
             if (responseCode != 250) return false;

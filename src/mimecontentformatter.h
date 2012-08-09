@@ -16,44 +16,26 @@
   See the LICENSE file for more details.
 */
 
-#ifndef MIMEHTML_H
-#define MIMEHTML_H
+#ifndef MIMECONTENTFORMATTER_H
+#define MIMECONTENTFORMATTER_H
 
-#include "mimetext.h"
+#include <QObject>
+#include <QByteArray>
 
-class MimeHtml : public MimeText
+class MimeContentFormatter : public QObject
 {
     Q_OBJECT
 public:
+    MimeContentFormatter (int max_length = 76);
 
-    /* [1] Constructors and Destructors */
+    void setMaxLength(int l);
+    int getMaxLength() const;
 
-    MimeHtml(const QString &html = "");
-    ~MimeHtml();
-
-    /* [1] --- */
-
-
-    /* [2] Getters and Setters */
-
-    void setHtml(const QString & html);
-
-    const QString& getHtml() const;
-
-    /* [2] --- */
+    QString format(const QString &content, bool quotedPrintable = false) const;
 
 protected:
+    int max_length;
 
-    /* [3] Protected members */
-
-    /* [3] --- */
-
-
-    /* [4] Protected methods */
-
-    virtual void prepare();
-
-    /* [4] --- */
 };
 
-#endif // MIMEHTML_H
+#endif // MIMECONTENTFORMATTER_H
