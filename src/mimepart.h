@@ -72,6 +72,8 @@ public:
     void setEncoding(Encoding enc);
     Encoding getEncoding() const;
 
+    MimeContentFormatter& getContentFormatter();
+
     /* [2] --- */
 
 

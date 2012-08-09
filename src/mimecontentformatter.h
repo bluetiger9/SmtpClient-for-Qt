@@ -29,8 +29,9 @@ public:
     MimeContentFormatter (int max_length = 76);
 
     void setMaxLength(int l);
+    int getMaxLength() const;
 
-    QString format(const QString &content, bool quotedPrintable = false);
+    QString format(const QString &content, bool quotedPrintable = false) const;
 
 protected:
     int max_length;

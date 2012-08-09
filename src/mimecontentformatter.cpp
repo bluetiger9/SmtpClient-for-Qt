@@ -22,7 +22,7 @@ MimeContentFormatter::MimeContentFormatter(int max_length) :
     max_length(max_length)
 {}
 
-QString MimeContentFormatter::format(const QString &content, bool quotedPrintable) {
+QString MimeContentFormatter::format(const QString &content, bool quotedPrintable) const {
 
     QString out;
 
@@ -43,7 +43,7 @@ QString MimeContentFormatter::format(const QString &content, bool quotedPrintabl
             }
 
             if ((chars > max_length - 1)
-                    || ((content[i] == '=') && (chars > max_length - 3) )) {
+                || ((content[i] == '=') && (chars > max_length - 3) )) {
                 out.append('=');
                 out.append("\r\n");
                 chars = 1;
@@ -59,4 +59,8 @@ QString MimeContentFormatter::format(const QString &content, bool quotedPrintabl
 
 void MimeContentFormatter::setMaxLength(int l) {
     max_length = l;
+}
+
+int MimeContentFormatter::getMaxLength() const {
+    return max_length;
 }
