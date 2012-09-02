@@ -54,6 +54,15 @@ public:
         TlsConnection       // STARTTLS
     };
 
+    enum State {
+        UnconnectedState,
+        ConnectingState,
+        ConnectedState,
+        AuthenticatingState,
+        MailSendingState,
+        DisconnectingState
+    };
+
     /* [0] --- */
 
 
