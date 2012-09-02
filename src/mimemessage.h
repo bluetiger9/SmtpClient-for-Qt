@@ -23,6 +23,7 @@
 #include "mimemultipart.h"
 #include "emailaddress.h"
 #include <QList>
+#include <QTextStream>
 
 class MimeMessage : public QObject
 {
@@ -67,6 +68,8 @@ public:
     /* [3] Public methods */
 
     virtual QString toString();
+    virtual void writeToStream(QTextStream &stream);
+    virtual void writeToDevice(QIODevice &device);
 
     /* [3] --- */
 
