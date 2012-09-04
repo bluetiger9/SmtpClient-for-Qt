@@ -25,6 +25,7 @@
 /* [1] Constructors and destructors */
 
 SmtpClient::SmtpClient(const QString & host, int port, ConnectionType connectionType) :
+    state(UnconnectedState),
     name("localhost"),
     authMethod(AuthPlain),
     connectionTimeout(5000),
@@ -377,7 +378,6 @@ void SmtpClient::quit()
 
 
 /* [4] Protected methods */
-
 void SmtpClient::waitForResponse() throw (ResponseTimeoutException)
 {
     if (!socket->waitForReadyRead(responseTimeout))
@@ -386,17 +386,70 @@ void SmtpClient::waitForResponse() throw (ResponseTimeoutException)
         throw ResponseTimeoutException();
     }
 
+    processResponse();
+}
+
+void SmtpClient::changeState(ClientState state) {
+    this->state = state;
+
+    switch (state)
+    {
+    case _ELHO_State:
+        // Service ready. Send ELHO message and chage the state
+        sendMessage("ELHO " + name);
+        break;
+
+    case _TLS_State:
+        // send a request to start TLS handshake
+        sendMessage("STARTTLS");
+        break;
+
+    default:
+        ;
+    }
+
+    if (state <= DisconnectingState) {  // don't emit for internal signals
+        emit stateChanged(state);
+    }
+}
+
+void SmtpClient::processResponse() {
     // Save the server's response
     responseText = socket->readAll();
 
     // Extract the respose code from the server's responce (first 3 digits)
     responseCode = responseText.left(3).toInt();
 
-    if (responseCode / 100 == 4)
-        emit smtpError(ServerError);
+    if (responseCode / 100 == 4) {
+        emit smtpError(ServerError); return;
+    }
 
-    if (responseCode / 100 == 5)
-        emit smtpError(ClientError);
+    if (responseCode / 100 == 5) {
+        emit smtpError(ClientError); return;
+    }
+
+    switch (state)
+    {
+    case ConnectedState:
+        // Just connected to the server. Wait for 220 (Service ready)
+        if (responseCode != 220) {
+            emit smtpError(ServerError); return;
+        }
+        changeState(_ELHO_State);
+        break;
+
+    case _ELHO_State:
+        // The response code needs to be 250.
+        if (responseCode != 250) {
+            emit smtpError(ServerError); return;
+        }
+
+        changeState((connectionType != TlsConnection) ? ReadyState : _TLS_State);
+        break;
+
+    default:
+        ;
+    }
 }
 
 void SmtpClient::sendMessage(const QString &text)
@@ -409,16 +462,28 @@ void SmtpClient::sendMessage(const QString &text)
 
 /* [5] Slots for the socket's signals */
 
-void SmtpClient::socketStateChanged(QAbstractSocket::SocketState state)
-{
+void SmtpClient::socketStateChanged(QAbstractSocket::SocketState state) {
+    switch (state)
+    {
+    case QAbstractSocket::ConnectedState:
+        changeState(ConnectedState);
+
+        break;
+    case QAbstractSocket::UnconnectedState:
+        changeState(UnconnectedState);
+        break;
+    default:
+        ;
+    }
 }
 
-void SmtpClient::socketError(QAbstractSocket::SocketError socketError)
-{
+void SmtpClient::socketError(QAbstractSocket::SocketError socketError) {
+    emit smtpError(SocketError);
 }
 
 void SmtpClient::socketReadyRead()
 {
+
 }
 
 /* [5] --- */
