@@ -44,7 +44,8 @@ public:
         ResponseTimeoutError,
         AuthenticationFailedError,
         ServerError,    // 4xx smtp error
-        ClientError     // 5xx smtp error
+        ClientError,    // 5xx smtp error
+        SocketError
     };
 
     enum ConnectionType
@@ -54,13 +55,24 @@ public:
         TlsConnection       // STARTTLS
     };
 
-    enum State {
-        UnconnectedState,
-        ConnectingState,
-        ConnectedState,
-        AuthenticatingState,
-        MailSendingState,
-        DisconnectingState
+    enum ClientState {
+        UnconnectedState = 0,
+        ConnectingState = 1,
+        ConnectedState = 2,
+        ReadyState = 3,
+        AuthenticatingState = 4,
+        MailSendingState = 5,
+        DisconnectingState = 6,
+
+        /* Internal States */
+        _ELHO_State = 50,
+        _TLS_State = 51,
+
+        /* Internal Substates */
+        _TLS_0_START = 60,
+        _TLS_1_ENCRYPT = 61,
+        _TLS_2_ELHO = 62
+
     };
 
     /* [0] --- */
@@ -126,6 +138,8 @@ protected:
     /* [4] Protected members */
 
     QTcpSocket *socket;
+    ClientState state;
+    bool syncMode;
 
     QString host;
     int port;
@@ -149,6 +163,9 @@ protected:
 
 
     /* [5] Protected methods */
+    void changeState(ClientState state);
+
+    void processResponse();
 
     void waitForResponse() throw (ResponseTimeoutException);
 
@@ -172,6 +189,7 @@ signals:
     /* [7] Signals */
 
     void smtpError(SmtpError e);
+    void stateChanged(ClientState s);
 
     /* [7] --- */
 
