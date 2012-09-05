@@ -380,23 +380,29 @@ void SmtpClient::quit()
 
 void SmtpClient::waitForResponse() throw (ResponseTimeoutException)
 {
-    if (!socket->waitForReadyRead(responseTimeout))
-    {
-        emit smtpError(ResponseTimeoutError);
-        throw ResponseTimeoutException();
-    }
+    do {
+        if (!socket->waitForReadyRead(responseTimeout))
+        {
+            emit smtpError(ResponseTimeoutError);
+            throw ResponseTimeoutException();
+        }
 
-    // Save the server's response
-    responseText = socket->readAll();
+        while (socket->canReadLine()) {
+            // Save the server's response
+            responseText = socket->readLine();
 
-    // Extract the respose code from the server's responce (first 3 digits)
-    responseCode = responseText.left(3).toInt();
+            // Extract the respose code from the server's responce (first 3 digits)
+            responseCode = responseText.left(3).toInt();
 
-    if (responseCode / 100 == 4)
-        emit smtpError(ServerError);
+            if (responseCode / 100 == 4)
+                emit smtpError(ServerError);
 
-    if (responseCode / 100 == 5)
-        emit smtpError(ClientError);
+            if (responseCode / 100 == 5)
+                emit smtpError(ClientError);
+
+            if (responseText[3] == ' ') { return; }
+        }
+    } while (true);
 }
 
 void SmtpClient::sendMessage(const QString &text)
