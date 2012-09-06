@@ -21,6 +21,8 @@
 #include <QFileInfo>
 #include <QByteArray>
 
+#include <iostream>
+using namespace std;
 
 /* [1] Constructors and destructors */
 
@@ -88,6 +90,10 @@ void SmtpClient::setConnectionType(ConnectionType ct)
     case SslConnection:
     case TlsConnection:
         socket = new QSslSocket(this);
+        //QSslSocket &s = *((QSslSocket*) socket);
+        connect(socket, SIGNAL(encrypted()),
+                this, SLOT(socketEncrypted()));
+        break;
     }
 }
 
@@ -152,155 +158,22 @@ QTcpSocket* SmtpClient::getSocket() {
 
 bool SmtpClient::connectToHost()
 {
-    switch (connectionType)
-    {
-    case TlsConnection:
-    case TcpConnection:
-        socket->connectToHost(host, port);
-        break;
-    case SslConnection:
-        ((QSslSocket*) socket)->connectToHostEncrypted(host, port);
-        break;
-
-    }
-
-    // Tries to connect to server
-    if (!socket->waitForConnected(connectionTimeout))
-    {
-        emit smtpError(ConnectionTimeoutError);
-        return false;
-    }
-
-    try
-    {
-        // Wait for the server's response
-        waitForResponse();
-
-        // If the response code is not 220 (Service ready)
-        // means that is something wrong with the server
-        if (responseCode != 220)
-        {
-            emit smtpError(ServerError);
-            return false;
-        }
-
-        // Send a EHLO/HELO message to the server
-        // The client's first command must be EHLO/HELO
-        sendMessage("EHLO " + name);
-
-        // Wait for the server's response
-        waitForResponse();
-
-        // The response code needs to be 250.
-        if (responseCode != 250) {
-            emit smtpError(ServerError);
-            return false;
-        }
-
-        if (connectionType == TlsConnection) {
-            // send a request to start TLS handshake
-            sendMessage("STARTTLS");
-
-            // Wait for the server's response
-            waitForResponse();
-
-            // The response code needs to be 220.
-            if (responseCode != 220) {
-                emit smtpError(ServerError);
-                return false;
-            };
-
-            ((QSslSocket*) socket)->startClientEncryption();
-
-            if (!((QSslSocket*) socket)->waitForEncrypted(connectionTimeout)) {
-                qDebug() << ((QSslSocket*) socket)->errorString();
-                emit SmtpError(ConnectionTimeoutError);
-                return false;
-            }
-
-            // Send ELHO one more time
-            sendMessage("EHLO " + name);
-
-            // Wait for the server's response
-            waitForResponse();
-
-            // The response code needs to be 250.
-            if (responseCode != 250) {
-                emit smtpError(ServerError);
-                return false;
-            }
-        }
-    }
-    catch (ResponseTimeoutException)
-    {
-        return false;
-    }
-
-    // If no errors occured the function returns true.
+    changeState(ConnectingState);
     return true;
 }
 
 bool SmtpClient::login()
 {
-    return login(user, password, authMethod);
+    changeState(AuthenticatingState);
+    return true;
 }
 
 bool SmtpClient::login(const QString &user, const QString &password, AuthMethod method)
 {
-    try {
-        if (method == AuthPlain)
-        {
-            // Sending command: AUTH PLAIN base64('\0' + username + '\0' + password)
-            sendMessage("AUTH PLAIN " + QByteArray().append((char) 0).append(user).append((char) 0).append(password).toBase64());
-
-            // Wait for the server's response
-            waitForResponse();
-
-            // If the response is not 235 then the authentication was faild
-            if (responseCode != 235)
-            {
-                emit smtpError(AuthenticationFailedError);
-                return false;
-            }
-        }
-        else if (method == AuthLogin)
-        {
-            // Sending command: AUTH LOGIN
-            sendMessage("AUTH LOGIN");
-
-            // Wait for 334 response code
-            waitForResponse();
-            if (responseCode != 334) { emit smtpError(AuthenticationFailedError); return false; }
-
-            // Send the username in base64
-            sendMessage(QByteArray().append(user).toBase64());
-
-            // Wait for 334
-            waitForResponse();
-            if (responseCode != 334) { emit smtpError(AuthenticationFailedError); return false; }
-
-            // Send the password in base64
-            sendMessage(QByteArray().append(password).toBase64());
-
-            // Wait for the server's responce
-            waitForResponse();
-
-            // If the response is not 235 then the authentication was faild
-            if (responseCode != 235)
-            {
-                emit smtpError(AuthenticationFailedError);
-                return false;
-            }
-        }
-    }
-    catch (ResponseTimeoutException e)
-    {
-        // Responce Timeout exceeded
-        emit smtpError(AuthenticationFailedError);
-        return false;
-    }
-
-    return true;
+    this->user = user;
+    this->password = password;
+    this->authMethod = method;
+    return login();
 }
 
 bool SmtpClient::sendMail(MimeMessage& email)
@@ -392,41 +265,103 @@ void SmtpClient::waitForResponse() throw (ResponseTimeoutException)
 void SmtpClient::changeState(ClientState state) {
     this->state = state;
 
+#ifdef QT_NO_DEBUG
+    // Emit stateChanged signal only for non-internal states
+    if (state <= DisconnectingState) {
+        emit stateChanged(state);
+    }
+#else
+    // emit all in debug mode
+    emit stateChanged(state);
+#endif
+
+
     switch (state)
     {
-    case _ELHO_State:
-        // Service ready. Send ELHO message and chage the state
-        sendMessage("ELHO " + name);
+    case ConnectingState:
+        switch (connectionType)
+        {
+        case TlsConnection:
+        case TcpConnection:
+            socket->connectToHost(host, port);
+            break;
+        case SslConnection:
+            ((QSslSocket*) socket)->connectToHostEncrypted(host, port);
+            break;
+        }
         break;
 
+    case _EHLO_State:
+        // Service ready. Send EHLO message and chage the state
+        sendMessage("EHLO " + name);
+        break;
+
+    case _READY_Connected:
+        changeState(ReadyState);
+        emit readyConnected();
+        break;
+
+    /* --- TLS --- */
     case _TLS_State:
+        changeState(_TLS_0_STARTTLS);
+        break;
+
+    case _TLS_0_STARTTLS:
         // send a request to start TLS handshake
         sendMessage("STARTTLS");
+        break;
+
+    case _TLS_1_ENCRYPT:
+        ((QSslSocket*) socket)->startClientEncryption();
+        break;
+
+    case _TLS_2_EHLO:
+        // Send EHLO one more time
+        sendMessage("EHLO " + name);
+        break;
+
+    case _READY_Encrypted:
+        changeState(_READY_Connected);
+        break;
+
+    /* --- AUTH --- */
+    case AuthenticatingState:
+        changeState(authMethod == AuthPlain ? _AUTH_PLAIN_0 : _AUTH_LOGIN_0);
+        break;
+
+    case _AUTH_PLAIN_0:
+        // Sending command: AUTH PLAIN base64('\0' + username + '\0' + password)
+        sendMessage("AUTH PLAIN " + QByteArray().append((char) 0).append(user)
+                    .append((char) 0).append(password).toBase64());
+        break;
+
+    case _AUTH_LOGIN_0:
+        sendMessage("AUTH LOGIN");
+        break;
+
+    case _AUTH_LOGIN_1_USER:
+        // Send the username in base64
+        sendMessage(QByteArray().append(user).toBase64());
+        break;
+
+    case _AUTH_LOGIN_2_PASS:
+        // Send the password in base64
+        sendMessage(QByteArray().append(password).toBase64());
+        break;
+
+    case _READY_Authenticated:
+        changeState(ReadyState);
+        emit authenticated();
         break;
 
     default:
         ;
     }
 
-    if (state <= DisconnectingState) {  // don't emit for internal signals
-        emit stateChanged(state);
-    }
+
 }
 
 void SmtpClient::processResponse() {
-    // Save the server's response
-    responseText = socket->readAll();
-
-    // Extract the respose code from the server's responce (first 3 digits)
-    responseCode = responseText.left(3).toInt();
-
-    if (responseCode / 100 == 4) {
-        emit smtpError(ServerError); return;
-    }
-
-    if (responseCode / 100 == 5) {
-        emit smtpError(ClientError); return;
-    }
 
     switch (state)
     {
@@ -435,16 +370,69 @@ void SmtpClient::processResponse() {
         if (responseCode != 220) {
             emit smtpError(ServerError); return;
         }
-        changeState(_ELHO_State);
+        changeState(_EHLO_State);
         break;
 
-    case _ELHO_State:
+    case _EHLO_State:
         // The response code needs to be 250.
         if (responseCode != 250) {
             emit smtpError(ServerError); return;
         }
 
-        changeState((connectionType != TlsConnection) ? ReadyState : _TLS_State);
+        changeState((connectionType != TlsConnection) ? _READY_Connected : _TLS_State);
+        break;
+
+    /* --- TLS --- */
+    case _TLS_0_STARTTLS:
+        // The response code needs to be 220.
+        if (responseCode != 220) {
+            emit smtpError(ServerError);
+            return;
+        }
+        changeState(_TLS_1_ENCRYPT);
+        break;
+
+    case _TLS_2_EHLO:
+        // The response code needs to be 250.
+        if (responseCode != 250) {
+            emit smtpError(ServerError);
+            return;
+        }
+        changeState(_READY_Encrypted);
+        break;
+
+    /* --- AUTH --- */
+    case _AUTH_PLAIN_0:
+        // If the response is not 235 then the authentication was failed
+        if (responseCode != 235) {
+            emit smtpError(AuthenticationFailedError);
+            return;
+        }
+        changeState(_READY_Authenticated);
+        break;
+
+    case _AUTH_LOGIN_0:
+        if (responseCode != 334) {
+            emit smtpError(AuthenticationFailedError);
+            return;
+        }
+        changeState(_AUTH_LOGIN_1_USER);
+        break;
+
+    case _AUTH_LOGIN_1_USER:
+        if (responseCode != 334) {
+            emit smtpError(AuthenticationFailedError);
+            return;
+        }
+        changeState(_AUTH_LOGIN_2_PASS);
+        break;
+
+    case _AUTH_LOGIN_2_PASS:
+        if (responseCode != 235) {
+            emit smtpError(AuthenticationFailedError);
+            return;
+        }
+        changeState(_READY_Authenticated);
         break;
 
     default:
@@ -454,6 +442,7 @@ void SmtpClient::processResponse() {
 
 void SmtpClient::sendMessage(const QString &text)
 {
+    socket->flush();
     socket->write(text.toUtf8() + "\r\n");
 }
 
@@ -478,12 +467,47 @@ void SmtpClient::socketStateChanged(QAbstractSocket::SocketState state) {
 }
 
 void SmtpClient::socketError(QAbstractSocket::SocketError socketError) {
+    qDebug() << "this is sparta" << endl;
     emit smtpError(SocketError);
 }
 
 void SmtpClient::socketReadyRead()
 {
+    QString responseLine;
 
+    while (socket->canReadLine()) {
+        // Save the server's response
+        responseLine = socket->readLine();
+        tempResponse += responseLine;
+
+        // Extract the respose code from the server's responce (first 3 digits)
+        responseCode = responseLine.left(3).toInt();
+
+        // Check for server error
+        if (responseCode / 100 == 4) {
+            emit smtpError(ServerError);
+            return;
+        }
+
+        // Check for client error
+        if (responseCode / 100 == 5) {
+            emit smtpError(ClientError);
+            return;
+        }
+    }
+
+    // Is this the last line of the response
+    if (responseLine[3] == ' ') {
+        responseText = tempResponse;
+        processResponse();
+
+    }
+}
+
+void SmtpClient::socketEncrypted() {
+    if (state == _TLS_1_ENCRYPT) {
+        changeState(_TLS_2_EHLO);
+    }
 }
 
 /* [5] --- */

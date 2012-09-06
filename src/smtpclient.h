@@ -65,13 +65,27 @@ public:
         DisconnectingState = 6,
 
         /* Internal States */
-        _ELHO_State = 50,
+        _EHLO_State = 50,
         _TLS_State = 51,
 
+        _READY_Connected = 52,
+        _READY_Authenticated = 53,
+        _READY_MailSended = 54,
+        _READY_Encrypted = 55,
+
         /* Internal Substates */
-        _TLS_0_START = 60,
+
+        // TLS
+        _TLS_0_STARTTLS = 60,
         _TLS_1_ENCRYPT = 61,
-        _TLS_2_ELHO = 62
+        _TLS_2_EHLO = 62,
+
+        // AUTH
+        _AUTH_PLAIN_0 = 63,
+        _AUTH_LOGIN_0 = 64,
+        _AUTH_LOGIN_1_USER = 65,
+        _AUTH_LOGIN_2_PASS = 66
+
 
     };
 
@@ -124,7 +138,8 @@ public:
     bool connectToHost();
 
     bool login();
-    bool login(const QString &user, const QString &password, AuthMethod method = AuthLogin);
+    bool login(const QString &user, const QString &password,
+               AuthMethod method = AuthLogin);
 
     bool sendMail(MimeMessage& email);
 
@@ -154,6 +169,7 @@ protected:
     int responseTimeout;
 
     QString responseText;
+    QString tempResponse;
     int responseCode;
 
 
@@ -180,6 +196,7 @@ protected slots:
     void socketStateChanged(QAbstractSocket::SocketState state);
     void socketError(QAbstractSocket::SocketError error);
     void socketReadyRead();
+    void socketEncrypted();
 
     /* [6] --- */
 
@@ -189,7 +206,12 @@ signals:
     /* [7] Signals */
 
     void smtpError(SmtpError e);
-    void stateChanged(ClientState s);
+    void stateChanged(SmtpClient::ClientState s);
+    void connected();
+    void readyConnected();
+    void authenticated();
+    void mailSended();
+    void disconnected();
 
     /* [7] --- */
 
