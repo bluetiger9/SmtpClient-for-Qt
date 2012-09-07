@@ -178,73 +178,15 @@ bool SmtpClient::login(const QString &user, const QString &password, AuthMethod 
 
 bool SmtpClient::sendMail(MimeMessage& email)
 {
-    try
-    {
-        // Send the MAIL command with the sender
-        sendMessage("MAIL FROM: <" + email.getSender().getAddress() + ">");
-
-        waitForResponse();
-
-        if (responseCode != 250) return false;
-
-        // Send RCPT command for each recipient
-        QList<EmailAddress*>::const_iterator it, itEnd;
-        // To (primary recipients)
-        for (it = email.getRecipients().begin(), itEnd = email.getRecipients().end();
-             it != itEnd; ++it)
-        {
-            sendMessage("RCPT TO: <" + (*it)->getAddress() + ">");
-            waitForResponse();
-
-            if (responseCode != 250) return false;
-        }
-
-        // Cc (carbon copy)
-        for (it = email.getRecipients(MimeMessage::Cc).begin(), itEnd = email.getRecipients(MimeMessage::Cc).end();
-             it != itEnd; ++it)
-        {
-            sendMessage("RCPT TO: <" + (*it)->getAddress() + ">");
-            waitForResponse();
-
-            if (responseCode != 250) return false;
-        }
-
-        // Bcc (blind carbon copy)
-        for (it = email.getRecipients(MimeMessage::Bcc).begin(), itEnd = email.getRecipients(MimeMessage::Bcc).end();
-             it != itEnd; ++it)
-        {
-            sendMessage("RCPT TO: <" + (*it)->getAddress() + ">");
-            waitForResponse();
-
-            if (responseCode != 250) return false;
-        }
-
-        // Send DATA command
-        sendMessage("DATA");
-        waitForResponse();
-
-        if (responseCode != 354) return false;
-
-        sendMessage(email.toString());
-
-        // Send \r\n.\r\n to end the mail data
-        sendMessage(".");
-
-        waitForResponse();
-
-        if (responseCode != 250) return false;
-    }
-    catch (ResponseTimeoutException)
-    {
-        return false;
-    }
+    this->email = &email;
+    changeState(MailSendingState);
 
     return true;
 }
 
 void SmtpClient::quit()
 {
-    sendMessage("QUIT");
+    changeState(DisconnectingState);
 }
 
 /* [3] --- */
@@ -291,6 +233,19 @@ void SmtpClient::changeState(ClientState state) {
         }
         break;
 
+    case AuthenticatingState:
+        changeState(authMethod == AuthPlain ? _AUTH_PLAIN_0 : _AUTH_LOGIN_0);
+        break;
+
+    case MailSendingState:
+        changeState(_MAIL_0_FROM);
+        break;
+
+    case DisconnectingState:
+        sendMessage("QUIT");
+        socket->disconnectFromHost();
+        break;
+
     case _EHLO_State:
         // Service ready. Send EHLO message and chage the state
         sendMessage("EHLO " + name);
@@ -325,10 +280,6 @@ void SmtpClient::changeState(ClientState state) {
         break;
 
     /* --- AUTH --- */
-    case AuthenticatingState:
-        changeState(authMethod == AuthPlain ? _AUTH_PLAIN_0 : _AUTH_LOGIN_0);
-        break;
-
     case _AUTH_PLAIN_0:
         // Sending command: AUTH PLAIN base64('\0' + username + '\0' + password)
         sendMessage("AUTH PLAIN " + QByteArray().append((char) 0).append(user)
@@ -354,11 +305,58 @@ void SmtpClient::changeState(ClientState state) {
         emit authenticated();
         break;
 
+    /* --- MAIL --- */
+    case _MAIL_0_FROM:
+        sendMessage("MAIL FROM: <" + email->getSender().getAddress() + ">");
+        break;
+
+    case _MAIL_1_RCPT_INIT:
+        rcptType++;
+        switch (rcptType)
+        {
+        case _TO:
+            addressList = &email->getRecipients(MimeMessage::To);
+            break;
+        case _CC:
+            addressList = &email->getRecipients(MimeMessage::Cc);
+            break;
+        case _BCC:
+            addressList = &email->getRecipients(MimeMessage::Bcc);
+            break;
+        default:
+            changeState(_MAIL_3_DATA);
+            return;
+        }
+        addressIt = addressList->constBegin();
+        changeState(_MAIL_2_RCPT);
+        break;
+
+    case _MAIL_2_RCPT:
+        if (addressIt != addressList->end()) {
+            sendMessage("RCPT TO: <" + (*addressIt)->getAddress() + ">");
+            addressIt++;
+        } else {
+            changeState(_MAIL_1_RCPT_INIT);
+        }
+        break;
+
+    case _MAIL_3_DATA:
+        sendMessage("DATA");
+        break;
+
+    case _MAIL_4_SEND_DATA:
+        sendMessage(email->toString());
+        sendMessage(".");
+        break;
+
+    case _READY_MailSended:
+        changeState(ReadyState);
+        emit mailSended();
+        break;
+
     default:
         ;
     }
-
-
 }
 
 void SmtpClient::processResponse() {
@@ -405,7 +403,7 @@ void SmtpClient::processResponse() {
     case _AUTH_PLAIN_0:
         // If the response is not 235 then the authentication was failed
         if (responseCode != 235) {
-            emit smtpError(AuthenticationFailedError);
+            emit smtpError(AuthenticationError);
             return;
         }
         changeState(_READY_Authenticated);
@@ -413,7 +411,7 @@ void SmtpClient::processResponse() {
 
     case _AUTH_LOGIN_0:
         if (responseCode != 334) {
-            emit smtpError(AuthenticationFailedError);
+            emit smtpError(AuthenticationError);
             return;
         }
         changeState(_AUTH_LOGIN_1_USER);
@@ -421,7 +419,7 @@ void SmtpClient::processResponse() {
 
     case _AUTH_LOGIN_1_USER:
         if (responseCode != 334) {
-            emit smtpError(AuthenticationFailedError);
+            emit smtpError(AuthenticationError);
             return;
         }
         changeState(_AUTH_LOGIN_2_PASS);
@@ -429,11 +427,45 @@ void SmtpClient::processResponse() {
 
     case _AUTH_LOGIN_2_PASS:
         if (responseCode != 235) {
-            emit smtpError(AuthenticationFailedError);
+            emit smtpError(AuthenticationError);
             return;
         }
         changeState(_READY_Authenticated);
         break;
+
+    /* --- MAIL --- */
+    case _MAIL_0_FROM:
+        if (responseCode != 250) {
+            emit smtpError(MailSendingError);
+            return;
+        }
+        changeState(_MAIL_1_RCPT_INIT);
+        break;
+
+    case _MAIL_2_RCPT:
+        if (responseCode != 250) {
+            emit smtpError(MailSendingError);
+            return;
+        }
+        changeState(_MAIL_2_RCPT);
+        break;
+
+    case _MAIL_3_DATA:
+        if (responseCode != 354) {
+            emit smtpError(MailSendingError);
+            return;
+        }
+        changeState(_MAIL_4_SEND_DATA);
+        break;
+
+    case _MAIL_4_SEND_DATA:
+        if (responseCode != 250) {
+            emit smtpError(MailSendingError);
+            return;
+        }
+        changeState(_READY_MailSended);
+        break;
+
 
     default:
         ;

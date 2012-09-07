@@ -40,12 +40,13 @@ public:
 
     enum SmtpError
     {
-        ConnectionTimeoutError,
-        ResponseTimeoutError,
-        AuthenticationFailedError,
-        ServerError,    // 4xx smtp error
-        ClientError,    // 5xx smtp error
-        SocketError
+        ConnectionTimeoutError = 0,
+        ResponseTimeoutError = 1,
+        AuthenticationError = 2,
+        MailSendingError = 3,
+        ServerError = 4,    // 4xx smtp error
+        ClientError = 5,    // 5xx smtp error
+        SocketError = 6
     };
 
     enum ConnectionType
@@ -81,12 +82,17 @@ public:
         _TLS_2_EHLO = 62,
 
         // AUTH
-        _AUTH_PLAIN_0 = 63,
-        _AUTH_LOGIN_0 = 64,
-        _AUTH_LOGIN_1_USER = 65,
-        _AUTH_LOGIN_2_PASS = 66
+        _AUTH_PLAIN_0 = 70,
+        _AUTH_LOGIN_0 = 71,
+        _AUTH_LOGIN_1_USER = 72,
+        _AUTH_LOGIN_2_PASS = 73,
 
-
+        // MAIL
+        _MAIL_0_FROM = 81,
+        _MAIL_1_RCPT_INIT = 82,
+        _MAIL_2_RCPT = 83,
+        _MAIL_3_DATA = 84,
+        _MAIL_4_SEND_DATA = 85
     };
 
     /* [0] --- */
@@ -172,6 +178,12 @@ protected:
     QString tempResponse;
     int responseCode;
 
+    MimeMessage *email;
+    QList<EmailAddress*>::const_iterator addressIt;
+    const QList<EmailAddress*> *addressList;
+
+    int rcptType;
+    enum _RcptType { _TO = 1, _CC = 2, _BCC = 3};
 
     class ResponseTimeoutException {};
 
@@ -205,7 +217,7 @@ signals:
 
     /* [7] Signals */
 
-    void smtpError(SmtpError e);
+    void smtpError(SmtpClient::SmtpError e);
     void stateChanged(SmtpClient::ClientState s);
     void connected();
     void readyConnected();
