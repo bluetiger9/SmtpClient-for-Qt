@@ -21,6 +21,7 @@
 
 #include <QObject>
 #include <QtNetwork/QSslSocket>
+#include <QEventLoop>
 
 #include "mimemessage.h"
 
@@ -71,7 +72,7 @@ public:
 
         _READY_Connected = 52,
         _READY_Authenticated = 53,
-        _READY_MailSended = 54,
+        _READY_MailSent = 54,
         _READY_Encrypted = 55,
 
         /* Internal Substates */
@@ -142,15 +143,15 @@ public:
     /* [3] Public methods */
 
     bool connectToHost();
-
     bool login();
     bool login(const QString &user, const QString &password,
                AuthMethod method = AuthLogin);
-
     bool sendMail(MimeMessage& email);
-
     void quit();
 
+    bool waitForReadyConnected(int msec = 30000);
+    bool waitForAuthenticated(int msec = 30000);
+    bool waitForMailSent(int msec = 30000);
 
     /* [3] --- */
 
@@ -178,14 +179,16 @@ protected:
     QString tempResponse;
     int responseCode;
 
+    bool isReadyConnected;
+    bool isAuthenticated;
+    bool isMailSent;
+
     MimeMessage *email;
     QList<EmailAddress*>::const_iterator addressIt;
     const QList<EmailAddress*> *addressList;
 
     int rcptType;
     enum _RcptType { _TO = 1, _CC = 2, _BCC = 3};
-
-    class ResponseTimeoutException {};
 
     /* [4] --- */
 
@@ -194,8 +197,6 @@ protected:
     void changeState(ClientState state);
 
     void processResponse();
-
-    void waitForResponse() throw (ResponseTimeoutException);
 
     void sendMessage(const QString &text);
 
@@ -217,12 +218,12 @@ signals:
 
     /* [7] Signals */
 
-    void smtpError(SmtpClient::SmtpError e);
+    void error(SmtpClient::SmtpError e);
     void stateChanged(SmtpClient::ClientState s);
     void connected();
     void readyConnected();
     void authenticated();
-    void mailSended();
+    void mailSent();
     void disconnected();
 
     /* [7] --- */

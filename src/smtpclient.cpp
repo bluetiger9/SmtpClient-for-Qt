@@ -20,6 +20,8 @@
 
 #include <QFileInfo>
 #include <QByteArray>
+#include <QTimer>
+#include <QEventLoop>
 
 #include <iostream>
 using namespace std;
@@ -31,7 +33,8 @@ SmtpClient::SmtpClient(const QString & host, int port, ConnectionType connection
     name("localhost"),
     authMethod(AuthPlain),
     connectionTimeout(5000),
-    responseTimeout(5000)
+    responseTimeout(5000),
+    isReadyConnected(false)
 {
     setConnectionType(connectionType);
 
@@ -189,20 +192,41 @@ void SmtpClient::quit()
     changeState(DisconnectingState);
 }
 
+
+bool SmtpClient::waitForReadyConnected(int msec) {
+    QEventLoop loop;
+
+    QTimer::singleShot(msec, &loop, SLOT(quit()));
+    QObject::connect(this, SIGNAL(readyConnected()), &loop, SLOT(quit()));
+
+    loop.exec();
+    return isReadyConnected;
+}
+
+bool SmtpClient::waitForAuthenticated(int msec) {
+    QEventLoop loop;
+
+    QTimer::singleShot(msec, &loop, SLOT(quit()));
+    QObject::connect(this, SIGNAL(authenticated()), &loop, SLOT(quit()));
+
+    loop.exec();
+    return isAuthenticated;
+}
+
+bool SmtpClient::waitForMailSent(int msec) {
+    QEventLoop loop;
+
+    QTimer::singleShot(msec, &loop, SLOT(quit()));
+    QObject::connect(this, SIGNAL(mailSent()), &loop, SLOT(quit()));
+
+    loop.exec();
+    return isMailSent;
+}
+
 /* [3] --- */
 
 
 /* [4] Protected methods */
-void SmtpClient::waitForResponse() throw (ResponseTimeoutException)
-{
-    if (!socket->waitForReadyRead(responseTimeout))
-    {
-        emit smtpError(ResponseTimeoutError);
-        throw ResponseTimeoutException();
-    }
-
-    processResponse();
-}
 
 void SmtpClient::changeState(ClientState state) {
     this->state = state;
@@ -234,10 +258,12 @@ void SmtpClient::changeState(ClientState state) {
         break;
 
     case AuthenticatingState:
+        isAuthenticated = false;
         changeState(authMethod == AuthPlain ? _AUTH_PLAIN_0 : _AUTH_LOGIN_0);
         break;
 
     case MailSendingState:
+        isMailSent = false;
         changeState(_MAIL_0_FROM);
         break;
 
@@ -252,6 +278,7 @@ void SmtpClient::changeState(ClientState state) {
         break;
 
     case _READY_Connected:
+        isReadyConnected = true;
         changeState(ReadyState);
         emit readyConnected();
         break;
@@ -301,6 +328,7 @@ void SmtpClient::changeState(ClientState state) {
         break;
 
     case _READY_Authenticated:
+        isAuthenticated = true;
         changeState(ReadyState);
         emit authenticated();
         break;
@@ -349,9 +377,10 @@ void SmtpClient::changeState(ClientState state) {
         sendMessage(".");
         break;
 
-    case _READY_MailSended:
+    case _READY_MailSent:
+        isMailSent = true;
         changeState(ReadyState);
-        emit mailSended();
+        emit mailSent();
         break;
 
     default:
@@ -366,7 +395,7 @@ void SmtpClient::processResponse() {
     case ConnectedState:
         // Just connected to the server. Wait for 220 (Service ready)
         if (responseCode != 220) {
-            emit smtpError(ServerError); return;
+            emit error(ServerError); return;
         }
         changeState(_EHLO_State);
         break;
@@ -374,7 +403,7 @@ void SmtpClient::processResponse() {
     case _EHLO_State:
         // The response code needs to be 250.
         if (responseCode != 250) {
-            emit smtpError(ServerError); return;
+            emit error(ServerError); return;
         }
 
         changeState((connectionType != TlsConnection) ? _READY_Connected : _TLS_State);
@@ -384,7 +413,7 @@ void SmtpClient::processResponse() {
     case _TLS_0_STARTTLS:
         // The response code needs to be 220.
         if (responseCode != 220) {
-            emit smtpError(ServerError);
+            emit error(ServerError);
             return;
         }
         changeState(_TLS_1_ENCRYPT);
@@ -393,7 +422,7 @@ void SmtpClient::processResponse() {
     case _TLS_2_EHLO:
         // The response code needs to be 250.
         if (responseCode != 250) {
-            emit smtpError(ServerError);
+            emit error(ServerError);
             return;
         }
         changeState(_READY_Encrypted);
@@ -403,7 +432,7 @@ void SmtpClient::processResponse() {
     case _AUTH_PLAIN_0:
         // If the response is not 235 then the authentication was failed
         if (responseCode != 235) {
-            emit smtpError(AuthenticationError);
+            emit error(AuthenticationError);
             return;
         }
         changeState(_READY_Authenticated);
@@ -411,7 +440,7 @@ void SmtpClient::processResponse() {
 
     case _AUTH_LOGIN_0:
         if (responseCode != 334) {
-            emit smtpError(AuthenticationError);
+            emit error(AuthenticationError);
             return;
         }
         changeState(_AUTH_LOGIN_1_USER);
@@ -419,7 +448,7 @@ void SmtpClient::processResponse() {
 
     case _AUTH_LOGIN_1_USER:
         if (responseCode != 334) {
-            emit smtpError(AuthenticationError);
+            emit error(AuthenticationError);
             return;
         }
         changeState(_AUTH_LOGIN_2_PASS);
@@ -427,7 +456,7 @@ void SmtpClient::processResponse() {
 
     case _AUTH_LOGIN_2_PASS:
         if (responseCode != 235) {
-            emit smtpError(AuthenticationError);
+            emit error(AuthenticationError);
             return;
         }
         changeState(_READY_Authenticated);
@@ -436,7 +465,7 @@ void SmtpClient::processResponse() {
     /* --- MAIL --- */
     case _MAIL_0_FROM:
         if (responseCode != 250) {
-            emit smtpError(MailSendingError);
+            emit error(MailSendingError);
             return;
         }
         changeState(_MAIL_1_RCPT_INIT);
@@ -444,7 +473,7 @@ void SmtpClient::processResponse() {
 
     case _MAIL_2_RCPT:
         if (responseCode != 250) {
-            emit smtpError(MailSendingError);
+            emit error(MailSendingError);
             return;
         }
         changeState(_MAIL_2_RCPT);
@@ -452,7 +481,7 @@ void SmtpClient::processResponse() {
 
     case _MAIL_3_DATA:
         if (responseCode != 354) {
-            emit smtpError(MailSendingError);
+            emit error(MailSendingError);
             return;
         }
         changeState(_MAIL_4_SEND_DATA);
@@ -460,10 +489,10 @@ void SmtpClient::processResponse() {
 
     case _MAIL_4_SEND_DATA:
         if (responseCode != 250) {
-            emit smtpError(MailSendingError);
+            emit error(MailSendingError);
             return;
         }
-        changeState(_READY_MailSended);
+        changeState(_READY_MailSent);
         break;
 
 
@@ -499,8 +528,7 @@ void SmtpClient::socketStateChanged(QAbstractSocket::SocketState state) {
 }
 
 void SmtpClient::socketError(QAbstractSocket::SocketError socketError) {
-    qDebug() << "this is sparta" << endl;
-    emit smtpError(SocketError);
+    emit error(SocketError);
 }
 
 void SmtpClient::socketReadyRead()
@@ -517,13 +545,13 @@ void SmtpClient::socketReadyRead()
 
         // Check for server error
         if (responseCode / 100 == 4) {
-            emit smtpError(ServerError);
+            emit error(ServerError);
             return;
         }
 
         // Check for client error
         if (responseCode / 100 == 5) {
-            emit smtpError(ClientError);
+            emit error(ClientError);
             return;
         }
     }
