@@ -19,13 +19,15 @@
 #ifndef MIMEMESSAGE_H
 #define MIMEMESSAGE_H
 
-#include "mimepart.h"
-#include "mimemultipart.h"
-#include "emailaddress.h"
 #include <QList>
 #include <QTextStream>
 
-class MimeMessage : public QObject
+#include "smtpmime_global.h"
+#include "mimepart.h"
+#include "mimemultipart.h"
+#include "emailaddress.h"
+
+class SMTP_MIME_EXPORT MimeMessage : public QObject
 {
 public:
 
@@ -68,8 +70,7 @@ public:
     /* [3] Public methods */
 
     virtual QString toString();
-    virtual void writeToStream(QTextStream &stream);
-    virtual void writeToDevice(QIODevice &device);
+    void writeToDevice(QIODevice &device);
 
     /* [3] --- */
 
@@ -83,6 +84,8 @@ protected:
     MimePart *content;
 
     MimePart::Encoding hEncoding;
+
+    static QString formatAddress(EmailAddress*, MimePart::Encoding);
 
     /* [4] --- */
 

@@ -44,14 +44,15 @@ MimeFile::~MimeFile()
 
 /* [3] Protected methods */
 
-void MimeFile::prepare()
-{
+
+void MimeFile::writeContent(QIODevice &device) {
     file->open(QIODevice::ReadOnly);
     this->content = file->readAll();
     file->close();
 
-    /* !!! IMPORTANT !!!! */
-    MimePart::prepare();
+    MimePart::writeContent(device);
+
+    this->content.clear();
 }
 
 /* [3] --- */

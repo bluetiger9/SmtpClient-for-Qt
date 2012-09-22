@@ -19,9 +19,10 @@
 #ifndef MIMEINLINEFILE_H
 #define MIMEINLINEFILE_H
 
+#include "smtpmime_global.h"
 #include "mimefile.h"
 
-class MimeInlineFile : public MimeFile
+class SMTP_MIME_EXPORT MimeInlineFile : public MimeFile
 {
 public:
 
@@ -45,8 +46,6 @@ protected:
 
 
     /* [4] Protected methods */
-
-    virtual void prepare();
 
     /* [4] --- */
 };

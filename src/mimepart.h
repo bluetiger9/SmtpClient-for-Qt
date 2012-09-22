@@ -20,9 +20,10 @@
 #define MIMEPART_H
 
 #include <QObject>
-#include "mimecontentformatter.h"
+#include <QTextStream>
+#include "smtpmime_global.h"
 
-class MimePart : public QObject
+class SMTP_MIME_EXPORT MimePart : public QObject
 {
     Q_OBJECT
 public:
@@ -53,7 +54,7 @@ public:
     const QByteArray& getContent() const;
 
     void setContent(const QByteArray & content);
-    void setHeader(const QString & header);
+    void setHeader(const QString & headerLines);
 
     void addHeaderLine(const QString & line);
 
@@ -72,7 +73,8 @@ public:
     void setEncoding(Encoding enc);
     Encoding getEncoding() const;
 
-    MimeContentFormatter& getContentFormatter();
+    void setMaxLineLength(const int length);
+    int getMaxLineLength() const;
 
     /* [2] --- */
 
@@ -80,18 +82,15 @@ public:
     /* [3] Public methods */
 
     virtual QString toString();
-
-    virtual void prepare();
+    void writeToDevice(QIODevice &device);
 
     /* [3] --- */
-
-
 
 protected:
 
     /* [4] Protected members */
 
-    QString header;
+    QString headerLines;
     QByteArray content;
 
     QString cId;
@@ -101,12 +100,14 @@ protected:
     QString cBoundary;
     Encoding cEncoding;
 
+    int maxLineLength;
+
     QString mimeString;
     bool prepared;
 
-    MimeContentFormatter formatter;
-
     /* [4] --- */
+
+    virtual void writeContent(QIODevice &device);
 };
 
 #endif // MIMEPART_H

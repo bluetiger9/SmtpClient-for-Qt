@@ -23,6 +23,7 @@
 MimeInlineFile::MimeInlineFile(QFile *f)
     : MimeFile(f)
 {
+    this->headerLines += "Content-Disposition: inline\r\n";
 }
 
 MimeInlineFile::~MimeInlineFile()
@@ -37,14 +38,6 @@ MimeInlineFile::~MimeInlineFile()
 
 
 /* [3] Protected methods */
-
-void MimeInlineFile::prepare()
-{       
-    this->header += "Content-Disposition: inline\r\n";
-
-    /* !!! IMPORTANT !!! */
-    MimeFile::prepare();
-}
 
 /* [3] --- */
 

@@ -16,8 +16,13 @@
   See the LICENSE file for more details.
 */
 
+#include <QBuffer>
 #include "mimepart.h"
 #include "quotedprintable.h"
+#include "mimebase64formatter.h"
+#include "mimeqpformatter.h"
+#include "mimebase64encoder.h"
+#include "mimeqpencoder.h"
 
 /* [1] Constructors and Destructors */
 
@@ -45,17 +50,17 @@ void MimePart::setContent(const QByteArray & content)
 
 void MimePart::setHeader(const QString & header)
 {
-    this->header = header;
+    this->headerLines = header;
 }
 
 void MimePart::addHeaderLine(const QString & line)
 {
-    this->header += line + "\r\n";
+    this->headerLines += line + "\r\n";
 }
 
 const QString& MimePart::getHeader() const
 {
-    return header;
+    return headerLines;
 }
 
 const QByteArray& MimePart::getContent() const
@@ -113,9 +118,12 @@ MimePart::Encoding MimePart::getEncoding() const
     return this->cEncoding;
 }
 
-MimeContentFormatter& MimePart::getContentFormatter()
-{
-    return this->formatter;
+void MimePart::setMaxLineLength(const int length) {
+    maxLineLength = length;
+}
+
+int MimePart::getMaxLineLength() const {
+    return maxLineLength;
 }
 
 /* [2] --- */
@@ -125,90 +133,91 @@ MimeContentFormatter& MimePart::getContentFormatter()
 
 QString MimePart::toString()
 {
-    if (!prepared)
-        prepare();
-
-    return mimeString;
+    QBuffer out;
+    out.open(QIODevice::WriteOnly);
+    writeToDevice(out);
+    return QString(out.buffer());
 }
 
-/* [3] --- */
-
-
-/* [4] Protected methods */
-
-void MimePart::prepare()
-{
-    mimeString = QString();
+void MimePart::writeToDevice(QIODevice &device) {
+    QString header;
 
     /* === Header Prepare === */
 
     /* Content-Type */
-    mimeString.append("Content-Type: ").append(cType);
+    header.append("Content-Type: ").append(cType);
 
     if (cName != "")
-        mimeString.append("; name=\"").append(cName).append("\"");
+        header.append("; name=\"").append(cName).append("\"");
 
     if (cCharset != "")
-        mimeString.append("; charset=").append(cCharset);
+        header.append("; charset=").append(cCharset);
 
     if (cBoundary != "")
-        mimeString.append("; boundary=").append(cBoundary);
+        header.append("; boundary=").append(cBoundary);
 
-    mimeString.append("\r\n");
+    header.append("\r\n");
     /* ------------ */
 
     /* Content-Transfer-Encoding */
-    mimeString.append("Content-Transfer-Encoding: ");
+    header.append("Content-Transfer-Encoding: ");
     switch (cEncoding)
     {
     case _7Bit:
-        mimeString.append("7bit\r\n");
+        header.append("7bit\r\n");
         break;
     case _8Bit:
-        mimeString.append("8bit\r\n");
+        header.append("8bit\r\n");
         break;
     case Base64:
-        mimeString.append("base64\r\n");
+        header.append("base64\r\n");
         break;
     case QuotedPrintable:
-        mimeString.append("quoted-printable\r\n");
+        header.append("quoted-printable\r\n");
         break;
     }
     /* ------------------------ */
 
     /* Content-Id */
     if (cId != NULL)
-        mimeString.append("Content-ID: <").append(cId).append(">\r\n");
+        header.append("Content-ID: <").append(cId).append(">\r\n");
     /* ---------- */
 
-    /* Addition header lines */
+    /* Additional header lines */
 
-    mimeString.append(header).append("\r\n");
+    header.append(headerLines).append("\r\n");
 
     /* ------------------------- */
 
     /* === End of Header Prepare === */
 
-    /* === Content === */
+    device.write(header.toAscii());
+
+    writeContent(device);
+}
+
+
+
+/* [3] --- */
+
+
+/* [4] Protected methods */
+
+void MimePart::writeContent(QIODevice &device) {
     switch (cEncoding)
     {
     case _7Bit:
-        mimeString.append(QString(content).toAscii());
-        break;
     case _8Bit:
-        mimeString.append(content);
+        device.write(content);
         break;
     case Base64:
-        mimeString.append(formatter.format(content.toBase64()));
+        MimeBase64Formatter(&device).write(MimeBase64Encoder().encode(content));
         break;
     case QuotedPrintable:
-        mimeString.append(formatter.format(QuotedPrintable::encode(content), true));
+        MimeQPFormatter(&device).write(MimeQpEncoder().encode(content));
         break;
     }
-    mimeString.append("\r\n");
-    /* === End of Content === */
-
-    prepared = true;
+    device.write("\r\n");
 }
 
 /* [4] --- */

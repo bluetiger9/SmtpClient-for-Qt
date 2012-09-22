@@ -19,9 +19,10 @@
 #ifndef MIMEHTML_H
 #define MIMEHTML_H
 
+#include "smtpmime_global.h"
 #include "mimetext.h"
 
-class MimeHtml : public MimeText
+class SMTP_MIME_EXPORT MimeHtml : public MimeText
 {
     Q_OBJECT
 public:
@@ -50,8 +51,6 @@ protected:
 
 
     /* [4] Protected methods */
-
-    virtual void prepare();
 
     /* [4] --- */
 };

@@ -19,9 +19,10 @@
 #ifndef MIMETEXT_H
 #define MIMETEXT_H
 
+#include "smtpmime_global.h"
 #include "mimepart.h"
 
-class MimeText : public MimePart
+class SMTP_MIME_EXPORT MimeText : public MimePart
 {
 public:
 
@@ -51,7 +52,7 @@ protected:
 
     /* [4] Protected methods */
 
-    void prepare();
+    void writeContent(QIODevice &device);
 
     /* [4] --- */
 

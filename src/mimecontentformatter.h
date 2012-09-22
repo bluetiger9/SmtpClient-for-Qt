@@ -1,41 +1,24 @@
-/*
-  Copyright (c) 2011-2012 - Tőkés Attila
-
-  This file is part of SmtpClient for Qt.
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  See the LICENSE file for more details.
-*/
-
 #ifndef MIMECONTENTFORMATTER_H
 #define MIMECONTENTFORMATTER_H
 
 #include <QObject>
-#include <QByteArray>
+#include <QIODevice>
 
-class MimeContentFormatter : public QObject
+class MimeContentFormatter : public QIODevice
 {
     Q_OBJECT
 public:
-    MimeContentFormatter (int max_length = 76);
+    MimeContentFormatter(QIODevice *device, int lineLength = 76);
 
-    void setMaxLength(int l);
-    int getMaxLength() const;
-
-    QString format(const QString &content, bool quotedPrintable = false) const;
+    int getLineLength() const;
+    void setLineLength(int l);
 
 protected:
-    int max_length;
+    qint64 readData(char *data, qint64 maxlen);
+    qint64 writeData(const char *data, qint64 len) = 0;
 
+    QIODevice *output;
+    int lineLength;
 };
 
 #endif // MIMECONTENTFORMATTER_H

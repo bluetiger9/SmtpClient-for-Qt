@@ -24,6 +24,7 @@
 MimeAttachment::MimeAttachment(QFile *file)
     : MimeFile(file)
 {
+    this->headerLines += "Content-disposition: attachment\r\n";
 }
 
 MimeAttachment::~MimeAttachment()
@@ -34,13 +35,5 @@ MimeAttachment::~MimeAttachment()
 
 
 /* [2] Protected methods */
-
-void MimeAttachment::prepare()
-{
-    this->header += "Content-disposition: attachment\r\n";
-
-    /* !!! IMPORTANT !!! */
-    MimeFile::prepare();
-}
 
 /* [2] --- */

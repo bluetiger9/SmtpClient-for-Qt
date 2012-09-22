@@ -19,9 +19,10 @@
 #ifndef EMAILADDRESS_H
 #define EMAILADDRESS_H
 
+#include "smtpmime_global.h"
 #include <QObject>
 
-class EmailAddress : public QObject
+class SMTP_MIME_EXPORT EmailAddress : public QObject
 {
     Q_OBJECT
 public:
