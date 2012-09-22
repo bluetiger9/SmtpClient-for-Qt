@@ -19,10 +19,11 @@
 #ifndef MIMEFILE_H
 #define MIMEFILE_H
 
-#include "mimepart.h"
 #include <QFile>
+#include "mimepart.h"
+#include "smtpmime_global.h"
 
-class MimeFile : public MimePart
+class SMTP_MIME_EXPORT MimeFile : public MimePart
 {
     Q_OBJECT
 public:
@@ -50,7 +51,8 @@ protected:
 
     /* [4] Protected methods */
 
-    virtual void prepare();
+    void writeContent(QIODevice &device);
+
 
     /* [4] --- */
 

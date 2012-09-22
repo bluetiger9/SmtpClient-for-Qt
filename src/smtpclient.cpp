@@ -182,6 +182,7 @@ bool SmtpClient::login(const QString &user, const QString &password, AuthMethod 
 bool SmtpClient::sendMail(MimeMessage& email)
 {
     this->email = &email;
+    this->rcptType = 0;
     changeState(MailSendingState);
 
     return true;
@@ -238,9 +239,9 @@ void SmtpClient::changeState(ClientState state) {
     }
 #else
     // emit all in debug mode
+    qDebug() << "State:" << state;
     emit stateChanged(state);
 #endif
-
 
     switch (state)
     {
@@ -373,8 +374,8 @@ void SmtpClient::changeState(ClientState state) {
         break;
 
     case _MAIL_4_SEND_DATA:
-        sendMessage(email->toString());
-        sendMessage(".");
+        email->writeToDevice(*socket);
+        sendMessage("\r\n.");
         break;
 
     case _READY_MailSent:
@@ -528,6 +529,9 @@ void SmtpClient::socketStateChanged(QAbstractSocket::SocketState state) {
 }
 
 void SmtpClient::socketError(QAbstractSocket::SocketError socketError) {
+#ifndef QT_NO_DEBUG
+    qDebug() << "SocketError:" << socketError << socket->error();
+#endif
     emit error(SocketError);
 }
 
@@ -538,7 +542,13 @@ void SmtpClient::socketReadyRead()
     while (socket->canReadLine()) {
         // Save the server's response
         responseLine = socket->readLine();
-        tempResponse += responseLine;
+        tempResponse += responseLine;       
+    }
+
+    // Is this the last line of the response
+    if (responseLine[3] == ' ') {
+        responseText = tempResponse;
+        tempResponse = "";
 
         // Extract the respose code from the server's responce (first 3 digits)
         responseCode = responseLine.left(3).toInt();
@@ -554,13 +564,8 @@ void SmtpClient::socketReadyRead()
             emit error(ClientError);
             return;
         }
-    }
 
-    // Is this the last line of the response
-    if (responseLine[3] == ' ') {
-        responseText = tempResponse;
         processResponse();
-
     }
 }
 

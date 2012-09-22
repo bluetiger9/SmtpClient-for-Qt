@@ -48,10 +48,4 @@ const QString & MimeHtml::getHtml() const
 
 /* [3] Protected methods */
 
-void MimeHtml::prepare()
-{
-    /* !!! IMPORTANT !!! */
-    MimeText::prepare();
-}
-
 /* [3] --- */

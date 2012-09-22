@@ -19,11 +19,13 @@
 #ifndef MIMEATTACHMENT_H
 #define MIMEATTACHMENT_H
 
+
 #include <QFile>
+#include "smtpmime_global.h"
 #include "mimepart.h"
 #include "mimefile.h"
 
-class MimeAttachment : public MimeFile
+class SMTP_MIME_EXPORT MimeAttachment : public MimeFile
 {
     Q_OBJECT
 public:
@@ -38,9 +40,6 @@ public:
 protected:
 
     /* [2] Protected methods */
-
-    virtual void prepare();
-
     /* [2] --- */
 };
 

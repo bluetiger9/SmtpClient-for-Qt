@@ -21,8 +21,9 @@
 
 #include <QObject>
 #include <QByteArray>
+#include "smtpmime_global.h"
 
-class QuotedPrintable : public QObject
+class SMTP_MIME_EXPORT QuotedPrintable : public QObject
 {
     Q_OBJECT
 public:

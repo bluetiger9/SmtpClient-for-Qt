@@ -22,11 +22,11 @@
 #include <QObject>
 #include <QtNetwork/QSslSocket>
 #include <QEventLoop>
-
+#include "smtpmime_global.h"
 #include "mimemessage.h"
 
 
-class SmtpClient : public QObject
+class SMTP_MIME_EXPORT SmtpClient : public QObject
 {
     Q_OBJECT
 public:
@@ -52,9 +52,9 @@ public:
 
     enum ConnectionType
     {
-        TcpConnection,
-        SslConnection,
-        TlsConnection       // STARTTLS
+        TcpConnection = 0,
+        SslConnection = 1,
+        TlsConnection = 2      // STARTTLS
     };
 
     enum ClientState {
@@ -135,7 +135,6 @@ public:
     int getResponseCode() const;
 
     QTcpSocket* getSocket();
-
 
     /* [2] --- */
 

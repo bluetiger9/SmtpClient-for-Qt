@@ -19,9 +19,12 @@
 #ifndef MIMEMULTIPART_H
 #define MIMEMULTIPART_H
 
+#include <QList>
+#include <QTextStream>
+#include "smtpmime_global.h"
 #include "mimepart.h"
 
-class MimeMultiPart : public MimePart
+class SMTP_MIME_EXPORT MimeMultiPart : public MimePart
 {
     Q_OBJECT
 public:
@@ -59,7 +62,7 @@ public:
 
     void addPart(MimePart *part);
 
-    virtual void prepare();
+    void writeContent(QIODevice &device);
 
     /* [3] --- */
 
