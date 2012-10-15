@@ -120,7 +120,6 @@ public:
     void setName(const QString &name);
 
     ConnectionType getConnectionType() const;
-    void setConnectionType(ConnectionType ct);
 
     const QString & getUser() const;
     void setUser(const QString &host);
@@ -193,10 +192,9 @@ protected:
 
 
     /* [5] Protected methods */
+    void setConnectionType(ConnectionType ct);
     void changeState(ClientState state);
-
     void processResponse();
-
     void sendMessage(const QString &text);
 
     /* [5] --- */

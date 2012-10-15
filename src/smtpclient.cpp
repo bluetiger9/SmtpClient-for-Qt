@@ -23,8 +23,6 @@
 #include <QTimer>
 #include <QEventLoop>
 
-#include <iostream>
-using namespace std;
 
 /* [1] Constructors and destructors */
 
@@ -56,100 +54,132 @@ SmtpClient::~SmtpClient() {}
 
 /* [2] Getters and Setters */
 
+/**
+ * @brief Sets the username to the specified value.
+ */
 void SmtpClient::setUser(const QString &user)
 {
     this->user = user;
 }
 
+/**
+ * @brief Sets the password to the specified value
+ */
 void SmtpClient::setPassword(const QString &password)
 {
     this->password = password;
 }
 
+/**
+ * @brief Changes the authentication method to the specified.
+ */
 void SmtpClient::setAuthMethod(AuthMethod method)
 {
     this->authMethod = method;
 }
 
+/**
+ * @brief Sets the host of connection.
+ */
 void SmtpClient::setHost(QString &host)
 {
     this->host = host;
 }
 
+/**
+ * @brief Sets the connection port to the specified value.
+ * @param port
+ */
 void SmtpClient::setPort(int port)
 {
     this->port = port;
 }
 
-void SmtpClient::setConnectionType(ConnectionType ct)
-{
-    this->connectionType = ct;
-
-    switch (connectionType)
-    {
-    case TcpConnection:
-        socket = new QTcpSocket(this);
-        break;
-    case SslConnection:
-    case TlsConnection:
-        socket = new QSslSocket(this);
-        //QSslSocket &s = *((QSslSocket*) socket);
-        connect(socket, SIGNAL(encrypted()),
-                this, SLOT(socketEncrypted()));
-        break;
-    }
-}
-
+/**
+ * @brief Returns the host name of the server.
+ */
 const QString& SmtpClient::getHost() const
 {
     return this->host;
 }
 
+/**
+ * @brief Returns the username used for authenticating.
+ */
 const QString& SmtpClient::getUser() const
 {
     return this->user;
 }
 
+/**
+ * @brief Returns the password used for authenticating.
+ */
 const QString& SmtpClient::getPassword() const
 {
     return this->password;
 }
 
+/**
+ * @brief Returns the authentication method used.
+ */
 SmtpClient::AuthMethod SmtpClient::getAuthMethod() const
 {
     return this->authMethod;
 }
 
+/**
+ * @brief Return the port.
+ */
 int SmtpClient::getPort() const
 {
     return this->port;
 }
 
+/**
+ * @brief Returns the connection type used.
+ */
 SmtpClient::ConnectionType SmtpClient::getConnectionType() const
 {
     return connectionType;
 }
 
+/**
+ * @brief Returns the client's name.
+ */
 const QString& SmtpClient::getName() const
 {
     return this->name;
 }
 
+/**
+ * @brief Sets the client's name. This name is sent by the EHLO command.
+ */
 void SmtpClient::setName(const QString &name)
 {
     this->name = name;
 }
 
+/**
+ * @brief Returns the last response of the server.
+ */
 const QString & SmtpClient::getResponseText() const
 {
     return responseText;
 }
 
+/**
+ * @brief Returns the last response code recived by the client.
+ */
 int SmtpClient::getResponseCode() const
 {
     return responseCode;
 }
 
+/**
+ * @brief Return the socket used by the client. The type of the of the
+ * connection is QTcpConnection in case of TcpConnection, and QSslSocket
+ * for SslConnection and TlsConnection.
+ */
 QTcpSocket* SmtpClient::getSocket() {
     return socket;
 }
@@ -228,6 +258,24 @@ bool SmtpClient::waitForMailSent(int msec) {
 
 
 /* [4] Protected methods */
+
+void SmtpClient::setConnectionType(ConnectionType ct)
+{
+    this->connectionType = ct;
+
+    switch (connectionType)
+    {
+    case TcpConnection:
+        socket = new QTcpSocket(this);
+        break;
+    case SslConnection:
+    case TlsConnection:
+        socket = new QSslSocket(this);
+        connect(socket, SIGNAL(encrypted()),
+                this, SLOT(socketEncrypted()));
+        break;
+    }
+}
 
 void SmtpClient::changeState(ClientState state) {
     this->state = state;
