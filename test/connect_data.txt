@@ -1,0 +1,11 @@
+smtp.gmail.com 25 1
+smtp.gmail.com 465 2
+smtp.gmail.com 587 3
+smtp.mail.yahoo.com 25 1
+smtp.mail.yahoo.com 465 2
+smtp.dummysmtp.com 25 1
+smtp.1and1.com 25 1
+smtp.1and1.com 465 2
+smtp.1and1.com 587 3
+smtp.live.com 25 1
+smtp.live.com 587 3
