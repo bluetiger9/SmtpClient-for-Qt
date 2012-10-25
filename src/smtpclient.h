@@ -92,6 +92,12 @@ public:
     const QString & getResponseText() const;
     int getResponseCode() const;
 
+    int getConnectionTimeout() const;
+    void setConnectionTimeout(int msec);
+
+    int getResponseTimeout() const;
+    void setResponseTimeout(int msec);
+
     QTcpSocket* getSocket();
 
 

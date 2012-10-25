@@ -144,6 +144,26 @@ QTcpSocket* SmtpClient::getSocket() {
     return socket;
 }
 
+int SmtpClient::getConnectionTimeout() const
+{
+    return connectionTimeout;
+}
+
+void SmtpClient::setConnectionTimeout(int msec)
+{
+    connectionTimeout = msec;
+}
+
+int SmtpClient::getResponseTimeout() const
+{
+    return responseTimeout;
+}
+
+void SmtpClient::setResponseTimeout(int msec)
+{
+    responseTimeout = msec;
+}
+
 /* [2] --- */
 
 
