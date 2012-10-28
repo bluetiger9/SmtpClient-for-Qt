@@ -169,6 +169,7 @@ protected:
     QString user;
     QString password;
     AuthMethod authMethod;
+    bool clearUserDataAfterLogin;
 
     int connectionTimeout;
     int responseTimeout;
