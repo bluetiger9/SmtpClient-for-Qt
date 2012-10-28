@@ -191,12 +191,18 @@ QTcpSocket* SmtpClient::getSocket() {
 
 bool SmtpClient::connectToHost()
 {
+    if (state != UnconnectedState)
+        return false;
+
     changeState(ConnectingState);
     return true;
 }
 
 bool SmtpClient::login()
 {
+    if (!isReadyConnected || isAuthenticated)
+        return false;
+
     changeState(AuthenticatingState);
     return true;
 }
@@ -211,6 +217,11 @@ bool SmtpClient::login(const QString &user, const QString &password, AuthMethod 
 
 bool SmtpClient::sendMail(MimeMessage& email)
 {
+    if (!isReadyConnected)
+        return false;
+
+    isMailSent = false;
+
     this->email = &email;
     this->rcptType = 0;
     changeState(MailSendingState);
@@ -225,32 +236,50 @@ void SmtpClient::quit()
 
 
 bool SmtpClient::waitForReadyConnected(int msec) {
-    QEventLoop loop;
+    if (state == UnconnectedState)
+        return false;
 
-    QTimer::singleShot(msec, &loop, SLOT(quit()));
+    QEventLoop loop;
     QObject::connect(this, SIGNAL(readyConnected()), &loop, SLOT(quit()));
 
+    if (isReadyConnected)
+        return true;
+
     loop.exec();
+    QTimer::singleShot(msec, &loop, SLOT(quit()));
+
     return isReadyConnected;
 }
 
 bool SmtpClient::waitForAuthenticated(int msec) {
-    QEventLoop loop;
+    if (!isReadyConnected)
+        return false;
 
-    QTimer::singleShot(msec, &loop, SLOT(quit()));
+    QEventLoop loop;
     QObject::connect(this, SIGNAL(authenticated()), &loop, SLOT(quit()));
 
+    if (isAuthenticated)
+        return true;
+
     loop.exec();
+    QTimer::singleShot(msec, &loop, SLOT(quit()));
+
     return isAuthenticated;
 }
 
 bool SmtpClient::waitForMailSent(int msec) {
-    QEventLoop loop;
+    if (!isReadyConnected)
+        return false;
 
-    QTimer::singleShot(msec, &loop, SLOT(quit()));
+    QEventLoop loop;
     QObject::connect(this, SIGNAL(mailSent()), &loop, SLOT(quit()));
 
+    if (isMailSent)
+        return true;
+
     loop.exec();
+    QTimer::singleShot(msec, &loop, SLOT(quit()));
+
     return isMailSent;
 }
 
