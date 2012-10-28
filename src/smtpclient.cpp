@@ -32,7 +32,9 @@ SmtpClient::SmtpClient(const QString & host, int port, ConnectionType connection
     authMethod(AuthPlain),
     connectionTimeout(5000),
     responseTimeout(5000),
-    isReadyConnected(false)
+    isReadyConnected(false),
+    isAuthenticated(false),
+    isMailSent(false)
 {
     setConnectionType(connectionType);
 
@@ -80,6 +82,7 @@ void SmtpClient::setAuthMethod(AuthMethod method)
 
 /**
  * @brief Sets the host of connection.
+ * @deprecated Use the constructor.
  */
 void SmtpClient::setHost(QString &host)
 {
@@ -89,6 +92,7 @@ void SmtpClient::setHost(QString &host)
 /**
  * @brief Sets the connection port to the specified value.
  * @param port
+ * @deprecated Use the constructor.
  */
 void SmtpClient::setPort(int port)
 {
@@ -212,6 +216,7 @@ bool SmtpClient::login(const QString &user, const QString &password, AuthMethod 
     this->user = user;
     this->password = password;
     this->authMethod = method;
+    clearUserDataAfterLogin = true;
     return login();
 }
 
@@ -407,6 +412,10 @@ void SmtpClient::changeState(ClientState state) {
 
     case _READY_Authenticated:
         isAuthenticated = true;
+        if (clearUserDataAfterLogin) {
+            password = ""; user = "";
+            clearUserDataAfterLogin = false;
+        }
         changeState(ReadyState);
         emit authenticated();
         break;
