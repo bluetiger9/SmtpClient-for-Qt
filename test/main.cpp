@@ -7,6 +7,7 @@ bool success = true;
 
 void runTest(QObject *test) {
     int retVal = QTest::qExec(test);
+    delete test;
     success &= retVal == 0;
 }
 
