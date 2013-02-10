@@ -48,7 +48,6 @@ HEADERS  += \
     mimebase64encoder.h \
     mimeqpencoder.h \
     mimeqpformatter.h \
-    mimepart.cpp.autosave \
     mimebase64formatter.h \
     mimecontentformatter.h
 

@@ -17,6 +17,7 @@
 */
 
 #include "mimemultipart.h"
+#include <QIODevice>
 #include <QTime>
 #include <QCryptographicHash>
 

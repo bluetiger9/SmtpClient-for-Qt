@@ -24,7 +24,6 @@
 
 class SMTP_MIME_EXPORT MimeHtml : public MimeText
 {
-    Q_OBJECT
 public:
 
     /* [1] Constructors and Destructors */

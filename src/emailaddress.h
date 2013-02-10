@@ -20,11 +20,10 @@
 #define EMAILADDRESS_H
 
 #include "smtpmime_global.h"
-#include <QObject>
+#include <QString>
 
-class SMTP_MIME_EXPORT EmailAddress : public QObject
+class SMTP_MIME_EXPORT EmailAddress
 {
-    Q_OBJECT
 public:
 
     /* [1] Constructors and Destructors */
