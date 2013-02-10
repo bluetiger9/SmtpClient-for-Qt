@@ -1,4 +1,3 @@
-#include <QtGui/QApplication>
 #include <QCoreApplication>
 #include <QtTest/QTest>
 #include <QDebug>
@@ -13,7 +12,7 @@ void runTest(QObject *test) {
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QCoreApplication a(argc, argv);
 
     runTest(new ConnectionTest());
 

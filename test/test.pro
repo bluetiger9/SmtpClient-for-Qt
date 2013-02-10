@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += testlib gui
+QT       += testlib
+QT       -= gui
 
 TARGET = test
 CONFIG   += console
