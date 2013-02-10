@@ -23,7 +23,7 @@ QString QuotedPrintable::encode(const QByteArray &input)
     QString output;
 
     char byte;
-    const char hex[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    static const char hex[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
     for (int i = 0; i < input.length() ; ++i)
     {
@@ -43,8 +43,8 @@ QString QuotedPrintable::encode(const QByteArray &input)
 
 QByteArray QuotedPrintable::decode(const QString &input)
 {
-    //                    0  1  2  3  4  5  6  7  8  9  :  ;  <  =  >  ?  @  A   B   C   D   E   F
-    const int hexVal[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 10, 11, 12, 13, 14, 15};
+    //                           0  1  2  3  4  5  6  7  8  9  :  ;  <  =  >  ?  @  A   B   C   D   E   F
+    static const int hexVal[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 10, 11, 12, 13, 14, 15};
 
     QByteArray output;
 
@@ -54,7 +54,15 @@ QByteArray QuotedPrintable::decode(const QString &input)
     {
         if (input.at(i).toLatin1() == '=')
         {
-            output.append((hexVal[input.at(i+1).toLatin1() - '0'] << 4) + hexVal[input.at(i+2).toLatin1() - '0']);
+            int x = input.at(i+1).toLatin1() - '0';
+            int y = input.at(i+2).toLatin1() - '0';
+            if (x >= 0 && y >= 0 && x < 23 && y < 23) {
+                output.append(char((hexVal[x] << 4) + hexVal[y]));
+            }
+            else {
+                output.append('=').append(char(x + '0')).append(char(y + '0'));
+            }
+
             i += 2;
         }
         else
