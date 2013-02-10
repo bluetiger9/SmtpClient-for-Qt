@@ -18,7 +18,7 @@
 
 #include "quotedprintable.h"
 
-QString& QuotedPrintable::encode(const QByteArray &input)
+QString QuotedPrintable::encode(const QByteArray &input)
 {
     QString *output = new QString();
 
@@ -43,7 +43,7 @@ QString& QuotedPrintable::encode(const QByteArray &input)
 }
 
 
-QByteArray& QuotedPrintable::decode(const QString &input)
+QByteArray QuotedPrintable::decode(const QString &input)
 {
     //                    0  1  2  3  4  5  6  7  8  9  :  ;  <  =  >  ?  @  A   B   C   D   E   F
     const int hexVal[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0, 10, 11, 12, 13, 14, 15};
