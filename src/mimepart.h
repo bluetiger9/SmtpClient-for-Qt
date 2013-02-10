@@ -19,13 +19,14 @@
 #ifndef MIMEPART_H
 #define MIMEPART_H
 
-#include <QObject>
-#include <QTextStream>
 #include "smtpmime_global.h"
+#include <QByteArray>
+#include <QString>
 
-class SMTP_MIME_EXPORT MimePart : public QObject
+class QIODevice;
+
+class SMTP_MIME_EXPORT MimePart
 {
-    Q_OBJECT
 public:
 
     /* [0] Enumerations */
@@ -43,7 +44,7 @@ public:
     /* [1] Constructors and Destructors */
 
     MimePart();
-    ~MimePart();
+    virtual ~MimePart();
 
     /* [1] --- */
 

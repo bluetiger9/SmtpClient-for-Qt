@@ -20,13 +20,11 @@
 #define MIMEMULTIPART_H
 
 #include <QList>
-#include <QTextStream>
 #include "smtpmime_global.h"
 #include "mimepart.h"
 
 class SMTP_MIME_EXPORT MimeMultiPart : public MimePart
 {
-    Q_OBJECT
 public:
 
     /* [0] Enums */
