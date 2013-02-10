@@ -48,7 +48,9 @@ QByteArray QuotedPrintable::decode(const QString &input)
 
     QByteArray output;
 
-    for (int i = 0; i < input.length(); ++i)
+    int len = input.length();
+    int i;
+    for (i = 0; i < len-2; ++i)
     {
         if (input.at(i).toLatin1() == '=')
         {
@@ -59,6 +61,11 @@ QByteArray QuotedPrintable::decode(const QString &input)
         {
             output.append(input.at(i).toLatin1());
         }
+    }
+
+    while (i<len) {
+        output.append(input.at(i).toLatin1());
+        ++i;
     }
 
     return output;
