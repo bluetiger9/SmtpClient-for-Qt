@@ -20,14 +20,12 @@
 #define MIMEATTACHMENT_H
 
 
-#include <QFile>
 #include "smtpmime_global.h"
 #include "mimepart.h"
 #include "mimefile.h"
 
 class SMTP_MIME_EXPORT MimeAttachment : public MimeFile
 {
-    Q_OBJECT
 public:
 
     /* [1] Constructors and Destructors */
