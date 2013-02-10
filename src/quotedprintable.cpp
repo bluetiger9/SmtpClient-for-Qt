@@ -29,7 +29,7 @@ QString QuotedPrintable::encode(const QByteArray &input)
     {
         byte = input[i];
 
-        if ((byte == 0x20) || (byte >= 33) && (byte <= 126) && (byte != 61)) {
+        if ((byte == 0x20) || ((byte >= 33) && (byte <= 126) && (byte != 61))) {
             output.append(byte);
         }
         else {
