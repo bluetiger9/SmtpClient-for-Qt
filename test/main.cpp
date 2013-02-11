@@ -1,4 +1,3 @@
-#include <QtGui/QApplication>
 #include <QCoreApplication>
 #include <QtTest/QTest>
 #include <QDebug>
@@ -6,16 +5,17 @@
 
 bool success = true;
 
-void runTest(QObject *test) {
-    int retVal = QTest::qExec(test);
+static void runTest(QObject *test, int argc, char** argv) {
+    int retVal = QTest::qExec(test, argc, argv);
+    delete test;
     success &= retVal == 0;
 }
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QCoreApplication a(argc, argv);
 
-    runTest(new ConnectionTest());
+    runTest(new ConnectionTest(), argc, argv);
 
     if (success)
         qDebug() << "SUCCESS";
