@@ -19,13 +19,13 @@
 #ifndef MIMEFILE_H
 #define MIMEFILE_H
 
-#include <QFile>
 #include "mimepart.h"
 #include "smtpmime_global.h"
 
+class QFile;
+
 class SMTP_MIME_EXPORT MimeFile : public MimePart
 {
-    Q_OBJECT
 public:
 
     /* [1] Constructors and Destructors */
