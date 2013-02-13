@@ -148,20 +148,20 @@ QString MimeMessage::toString()
     return QString(out.buffer());
 }
 
-QString MimeMessage::formatAddress(EmailAddress *address, MimePart::Encoding encoding) {
-    QString result;
-    if (address->getName() != "")
+QByteArray MimeMessage::formatAddress(EmailAddress *address, MimePart::Encoding encoding) {
+    QByteArray result;
+    if (!address->getName().isEmpty())
     {
         switch (encoding)
         {
         case MimePart::Base64:
-            result.append(" =?utf-8?B?" + QByteArray().append(address->getName()).toBase64() + "?=");
+            result.append(" =?utf-8?B?" + address->getName().toLocal8Bit().toBase64() + "?=");
             break;
         case MimePart::QuotedPrintable:
-            result.append(" =?utf-8?Q?" + QuotedPrintable::encode(QByteArray().append(address->getName())).replace(' ', "_").replace(':',"=3A") + "?=");
+            result.append(" =?utf-8?Q?" + QuotedPrintable::encode(address->getName().toLocal8Bit()).toLocal8Bit().replace(' ', "_").replace(':',"=3A") + "?=");
             break;
         default:
-            result.append(" " + address->getName());
+            result.append(" ").append(address->getName().toLocal8Bit());
         }
     }
     result.append(" <" + address->getAddress() + ">");
@@ -172,17 +172,16 @@ void MimeMessage::writeToDevice(QIODevice &out) {
     /* =========== MIME HEADER ============ */
 
     /* ---------- Sender / From ----------- */
-    QString header;
+    QByteArray header;
     header.append("From:" + formatAddress(sender, hEncoding) + "\r\n");
     /* ---------------------------------- */
 
     /* ------- Recipients / To ---------- */
     header.append("To:");
-    QList<EmailAddress*>::iterator it;  int i;
-    for (i = 0, it = recipientsTo.begin(); it != recipientsTo.end(); ++it, ++i)
+    for (int i = 0; i<recipientsTo.size(); ++i)
     {
         if (i != 0) { header.append(","); }
-        header.append(formatAddress(*it, hEncoding));
+        header.append(formatAddress(recipientsTo.at(i), hEncoding));
     }
     header.append("\r\n");
     /* ---------------------------------- */
@@ -191,10 +190,10 @@ void MimeMessage::writeToDevice(QIODevice &out) {
     if (recipientsCc.size() != 0) {
         header.append("Cc:");
     }
-    for (i = 0, it = recipientsCc.begin(); it != recipientsCc.end(); ++it, ++i)
+    for (int i = 0; i<recipientsCc.size(); ++i)
     {
         if (i != 0) { header.append(","); }
-        header.append(formatAddress(*it, hEncoding));
+        header.append(formatAddress(recipientsCc.at(i), hEncoding));
     }
     if (recipientsCc.size() != 0) {
         header.append("\r\n");
@@ -208,10 +207,10 @@ void MimeMessage::writeToDevice(QIODevice &out) {
     switch (hEncoding)
     {
     case MimePart::Base64:
-        header.append("=?utf-8?B?" + QByteArray().append(subject).toBase64() + "?=");
+        header.append("=?utf-8?B?" + subject.toLocal8Bit().toBase64() + "?=");
         break;
     case MimePart::QuotedPrintable:
-        header.append("=?utf-8?Q?" + QuotedPrintable::encode(QByteArray().append(subject)).replace(' ', "_").replace(':',"=3A") + "?=");
+        header.append("=?utf-8?Q?" + QuotedPrintable::encode(subject.toLocal8Bit()).toLocal8Bit().replace(' ', "_").replace(':',"=3A") + "?=");
         break;
     default:
         header.append(subject);
@@ -221,7 +220,7 @@ void MimeMessage::writeToDevice(QIODevice &out) {
     header.append("\r\n");
     header.append("MIME-Version: 1.0\r\n");
 
-    out.write(header.toAscii());
+    out.write(header);
     content->writeToDevice(out);
 }
 

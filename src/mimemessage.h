@@ -85,7 +85,7 @@ protected:
 
     MimePart::Encoding hEncoding;
 
-    static QString formatAddress(EmailAddress*, MimePart::Encoding);
+    static QByteArray formatAddress(EmailAddress*, MimePart::Encoding);
 
     /* [4] --- */
 
