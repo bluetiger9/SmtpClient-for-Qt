@@ -60,13 +60,13 @@ void MimeMultiPart::writeContent(QIODevice &device) {
     content = "";
     for (it = parts.begin(); it != parts.end(); it++) {
         device.write("--" );
-        device.write(cBoundary.toAscii());
+        device.write(cBoundary.toLatin1());
         device.write("\r\n");
         (*it)->writeToDevice(device);
     };
 
     device.write("--");
-    device.write(cBoundary.toAscii());
+    device.write(cBoundary.toLatin1());
     device.write("--\r\n");
 }
 

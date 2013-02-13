@@ -4,5 +4,5 @@
 MimeQpEncoder::MimeQpEncoder() {}
 
 QByteArray MimeQpEncoder::encode(const QByteArray &data) {
-    return QuotedPrintable::encode(data).toAscii();
+    return QuotedPrintable::encode(data).toLatin1();
 }
