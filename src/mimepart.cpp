@@ -191,7 +191,7 @@ void MimePart::writeToDevice(QIODevice &device) {
 
     /* === End of Header Prepare === */
 
-    device.write(header.toAscii());
+    device.write(header.toLatin1());
 
     writeContent(device);
 }
