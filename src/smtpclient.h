@@ -29,6 +29,7 @@
 class SMTP_MIME_EXPORT SmtpClient : public QObject
 {
     Q_OBJECT
+    Q_ENUMS (AuthMethod SmtpError ConnectionType ClientState)
 public:
 
     /* [0] Enumerations */

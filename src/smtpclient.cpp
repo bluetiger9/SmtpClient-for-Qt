@@ -22,7 +22,7 @@
 #include <QByteArray>
 #include <QTimer>
 #include <QEventLoop>
-
+#include <QMetaEnum>
 
 /* [1] Constructors and destructors */
 
@@ -311,7 +311,7 @@ void SmtpClient::setConnectionType(ConnectionType ct)
     }
 }
 
-void SmtpClient::changeState(ClientState state) {
+void SmtpClient::changeState(SmtpClient::ClientState state) {
     this->state = state;
 
 #ifdef QT_NO_DEBUG
@@ -321,7 +321,7 @@ void SmtpClient::changeState(ClientState state) {
     }
 #else
     // emit all in debug mode
-    qDebug() << "State:" << state;
+    qDebug() << "[SmtpClient] State:" << staticMetaObject.enumerator(staticMetaObject.indexOfEnumerator("ClientState")).valueToKey(state);
     emit stateChanged(state);
 #endif
 
@@ -461,6 +461,11 @@ void SmtpClient::changeState(ClientState state) {
 
     case _MAIL_4_SEND_DATA:
         email->writeToDevice(*socket);
+
+#ifndef QT_NO_DEBUG
+        qDebug() << "[Socket] OUT:";
+        qDebug() << email->toString();
+#endif
         sendMessage("\r\n.");
         break;
 
@@ -582,7 +587,6 @@ void SmtpClient::processResponse() {
         changeState(_READY_MailSent);
         break;
 
-
     default:
         ;
     }
@@ -590,6 +594,11 @@ void SmtpClient::processResponse() {
 
 void SmtpClient::sendMessage(const QString &text)
 {
+
+#ifndef QT_NO_DEBUG
+    qDebug() << "[Socket] OUT:" << text;
+#endif
+
     socket->flush();
     socket->write(text.toUtf8() + "\r\n");
 }
@@ -600,6 +609,11 @@ void SmtpClient::sendMessage(const QString &text)
 /* [5] Slots for the socket's signals */
 
 void SmtpClient::socketStateChanged(QAbstractSocket::SocketState state) {
+
+#ifndef QT_NO_DEBUG
+    qDebug() << "[Socket] State:" << state;
+#endif
+
     switch (state)
     {
     case QAbstractSocket::ConnectedState:
@@ -616,7 +630,7 @@ void SmtpClient::socketStateChanged(QAbstractSocket::SocketState state) {
 
 void SmtpClient::socketError(QAbstractSocket::SocketError socketError) {
 #ifndef QT_NO_DEBUG
-    qDebug() << "SocketError:" << socketError << socket->error();
+    qDebug() << "[Socket] ERROR:" << socketError;
 #else
     Q_UNUSED(socketError);
 #endif
@@ -630,8 +644,14 @@ void SmtpClient::socketReadyRead()
     while (socket->canReadLine()) {
         // Save the server's response
         responseLine = socket->readLine();
-        tempResponse += responseLine;       
+        tempResponse += responseLine;
+
+#ifndef QT_NO_DEBUG
+        qDebug() << "[Socket] IN: " << responseLine;
+#endif
     }
+
+
 
     // Is this the last line of the response
     if (responseLine[3] == ' ') {
