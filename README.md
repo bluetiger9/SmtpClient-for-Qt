@@ -8,6 +8,8 @@ The SmtpClient for Qt is small library writen for Qt 4 (C++ version) that allows
 
 - Qt5 compatibility
 
+- Building as a shared library
+
 - code of SmtpClient refactored and partially rewrited
 
 ##New in version 1.1:
