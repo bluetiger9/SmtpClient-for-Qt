@@ -29,7 +29,7 @@ QString& QuotedPrintable::encode(const QByteArray &input)
     {
         byte = input[i];
 
-        if ((byte == 0x20) || (byte >= 33) && (byte <= 126) && (byte != 61))
+        if ((byte == 0x20) || ((byte >= 33) && (byte <= 126) && (byte != 61)))
         {
             output->append(byte);
         }
@@ -54,13 +54,13 @@ QByteArray& QuotedPrintable::decode(const QString &input)
 
     for (int i = 0; i < input.length(); ++i)
     {
-        if (input.at(i).toAscii() == '=')
+        if (input.at(i).toLatin1() == '=')
         {
-            output->append((hexVal[input.at(++i).toAscii() - '0'] << 4) + hexVal[input.at(++i).toAscii() - '0']);
+            output->append((hexVal[input.at(++i).toLatin1() - '0'] << 4) + hexVal[input.at(++i).toLatin1() - '0']);
         }
         else
         {
-            output->append(input.at(i).toAscii());
+            output->append(input.at(i).toLatin1());
         }
     }
 
