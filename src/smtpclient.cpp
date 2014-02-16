@@ -250,8 +250,8 @@ bool SmtpClient::waitForReadyConnected(int msec) {
     if (isReadyConnected)
         return true;
 
-    loop.exec();
     QTimer::singleShot(msec, &loop, SLOT(quit()));
+    loop.exec();
 
     return isReadyConnected;
 }
@@ -266,8 +266,8 @@ bool SmtpClient::waitForAuthenticated(int msec) {
     if (isAuthenticated)
         return true;
 
-    loop.exec();
     QTimer::singleShot(msec, &loop, SLOT(quit()));
+    loop.exec();
 
     return isAuthenticated;
 }
@@ -282,8 +282,8 @@ bool SmtpClient::waitForMailSent(int msec) {
     if (isMailSent)
         return true;
 
+    QTimer::singleShot(msec, &loop, SLOT(quit()));    
     loop.exec();
-    QTimer::singleShot(msec, &loop, SLOT(quit()));
 
     return isMailSent;
 }
