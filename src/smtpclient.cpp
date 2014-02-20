@@ -28,7 +28,8 @@ SmtpClient::SmtpClient(const QString & host, int port, ConnectionType connection
     name("localhost"),
     authMethod(AuthPlain),
     connectionTimeout(5000),
-    responseTimeout(5000)
+    responseTimeout(5000),
+    sendMessageTimeout(60000)
 {
     setConnectionType(connectionType);
 
@@ -163,6 +164,14 @@ void SmtpClient::setResponseTimeout(int msec)
 {
     responseTimeout = msec;
 }
+int SmtpClient::getSendMessageTimeout() const
+{
+  return sendMessageTimeout;
+}
+void SmtpClient::setSendMessageTimeout(int msec)
+{
+  sendMessageTimeout = msec;
+}
 
 /* [2] --- */
 
@@ -233,7 +242,7 @@ bool SmtpClient::connectToHost()
 
             if (!((QSslSocket*) socket)->waitForEncrypted(connectionTimeout)) {
                 qDebug() << ((QSslSocket*) socket)->errorString();
-                emit SmtpError(ConnectionTimeoutError);
+                emit smtpError(ConnectionTimeoutError);
                 return false;
             }
 
@@ -251,6 +260,10 @@ bool SmtpClient::connectToHost()
         }
     }
     catch (ResponseTimeoutException)
+    {
+        return false;
+    }
+    catch (SendMessageTimeoutException)
     {
         return false;
     }
@@ -315,6 +328,12 @@ bool SmtpClient::login(const QString &user, const QString &password, AuthMethod 
     catch (ResponseTimeoutException e)
     {
         // Responce Timeout exceeded
+        emit smtpError(AuthenticationFailedError);
+        return false;
+    }
+    catch (SendMessageTimeoutException)
+    {
+	// Send Timeout exceeded
         emit smtpError(AuthenticationFailedError);
         return false;
     }
@@ -384,6 +403,10 @@ bool SmtpClient::sendMail(MimeMessage& email)
     {
         return false;
     }
+    catch (SendMessageTimeoutException)
+    {
+        return false;
+    }
 
     return true;
 }
@@ -425,9 +448,14 @@ void SmtpClient::waitForResponse() throw (ResponseTimeoutException)
     } while (true);
 }
 
-void SmtpClient::sendMessage(const QString &text)
+void SmtpClient::sendMessage(const QString &text) throw (SendMessageTimeoutException)
 {
     socket->write(text.toUtf8() + "\r\n");
+    if (! socket->waitForBytesWritten(sendMessageTimeout))
+    {
+      emit smtpError(SendDataTimeoutError);
+      throw SendMessageTimeoutException();
+    }
 }
 
 /* [4] --- */
