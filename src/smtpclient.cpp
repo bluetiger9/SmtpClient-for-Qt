@@ -30,8 +30,6 @@ SmtpClient::SmtpClient(const QString & host, int port, ConnectionType connection
     state(UnconnectedState),
     name("localhost"),
     authMethod(AuthPlain),
-    connectionTimeout(5000),
-    responseTimeout(5000),
     isReadyConnected(false),
     isAuthenticated(false),
     isMailSent(false)

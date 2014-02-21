@@ -172,9 +172,6 @@ protected:
     AuthMethod authMethod;
     bool clearUserDataAfterLogin;
 
-    int connectionTimeout;
-    int responseTimeout;
-
     QString responseText;
     QString tempResponse;
     int responseCode;
