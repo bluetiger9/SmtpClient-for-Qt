@@ -78,7 +78,8 @@ protected:
     QList<EmailAddress*> recipientsTo, recipientsCc, recipientsBcc;
     QString subject;
     MimePart *content;
-
+    bool autoMimeContentCreated;
+    
     MimePart::Encoding hEncoding;
 
     /* [4] --- */

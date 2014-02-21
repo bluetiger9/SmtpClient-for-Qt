@@ -42,6 +42,7 @@ public:
     {
         ConnectionTimeoutError,
         ResponseTimeoutError,
+        SendDataTimeoutError,
         AuthenticationFailedError,
         ServerError,    // 4xx smtp error
         ClientError     // 5xx smtp error
@@ -97,6 +98,9 @@ public:
 
     int getResponseTimeout() const;
     void setResponseTimeout(int msec);
+    
+    int getSendMessageTimeout() const;
+    void setSendMessageTimeout(int msec);
 
     QTcpSocket* getSocket();
 
@@ -135,12 +139,15 @@ protected:
 
     int connectionTimeout;
     int responseTimeout;
-
+    int sendMessageTimeout;
+    
+    
     QString responseText;
     int responseCode;
 
 
     class ResponseTimeoutException {};
+    class SendMessageTimeoutException {};
 
     /* [4] --- */
 
@@ -149,7 +156,7 @@ protected:
 
     void waitForResponse() throw (ResponseTimeoutException);
 
-    void sendMessage(const QString &text);
+    void sendMessage(const QString &text) throw (SendMessageTimeoutException);
 
     /* [5] --- */
 
