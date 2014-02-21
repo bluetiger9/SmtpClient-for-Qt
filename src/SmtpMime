@@ -27,5 +27,6 @@
 #include "mimetext.h"
 #include "mimeinlinefile.h"
 #include "mimefile.h"
+#include "mimebytearrayattachment.h"
 
 #endif // SMTPMIME_H
