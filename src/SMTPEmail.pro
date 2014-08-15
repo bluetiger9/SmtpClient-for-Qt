@@ -9,7 +9,7 @@ QT = core network
 TARGET = SmtpMime
 TEMPLATE = lib
 
-DEFINE += SMTP_MIME_LIBRARY
+DEFINES += SMTP_MIME_LIBRARY
 
 SOURCES += \
     emailaddress.cpp \
