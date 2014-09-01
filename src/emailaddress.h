@@ -21,7 +21,9 @@
 
 #include <QObject>
 
-class EmailAddress : public QObject
+#include "smtpexports.h"
+
+class SMTP_EXPORT EmailAddress : public QObject
 {
     Q_OBJECT
 public:

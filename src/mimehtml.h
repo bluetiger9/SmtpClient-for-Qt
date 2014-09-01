@@ -21,7 +21,9 @@
 
 #include "mimetext.h"
 
-class MimeHtml : public MimeText
+#include "smtpexports.h"
+
+class SMTP_EXPORT MimeHtml : public MimeText
 {
     Q_OBJECT
 public:
