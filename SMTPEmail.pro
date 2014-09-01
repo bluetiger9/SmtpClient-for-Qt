@@ -7,8 +7,13 @@
 QT       += core gui network
 
 TARGET = SMTPEmail
-TEMPLATE = app
 
+TEMPLATE = app
+# uncomment this to build a shared library
+#TEMPLATE = lib
+#CONFIG += dll
+
+DEFINES += SMTP_BUILD
 
 SOURCES += \
     src/emailaddress.cpp \
@@ -37,7 +42,8 @@ HEADERS  += \
     src/SmtpMime \
     src/quotedprintable.h \
     src/mimemultipart.h \
-    src/mimecontentformatter.h
+    src/mimecontentformatter.h \
+    src/smtpexports.h
 
 OTHER_FILES += \
     LICENSE \

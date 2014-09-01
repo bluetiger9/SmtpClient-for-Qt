@@ -23,9 +23,9 @@
 #include <QtNetwork/QSslSocket>
 
 #include "mimemessage.h"
+#include "smtpexports.h"
 
-
-class SmtpClient : public QObject
+class SMTP_EXPORT SmtpClient : public QObject
 {
     Q_OBJECT
 public:
