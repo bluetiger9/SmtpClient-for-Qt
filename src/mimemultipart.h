@@ -21,7 +21,9 @@
 
 #include "mimepart.h"
 
-class MimeMultiPart : public MimePart
+#include "smtpexports.h"
+
+class SMTP_EXPORT MimeMultiPart : public MimePart
 {
     Q_OBJECT
 public:

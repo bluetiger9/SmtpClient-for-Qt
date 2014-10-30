@@ -21,7 +21,9 @@
 
 #include "mimefile.h"
 
-class MimeInlineFile : public MimeFile
+#include "smtpexports.h"
+
+class SMTP_EXPORT MimeInlineFile : public MimeFile
 {
 public:
 
