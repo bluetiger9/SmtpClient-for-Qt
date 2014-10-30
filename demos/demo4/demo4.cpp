@@ -14,12 +14,13 @@
   See the LICENSE file for more details.
 */
 
-#include <QtGui/QApplication>
-#include "../src/SmtpMime"
+#include <QtCore>
+
+#include "../../src/SmtpMime"
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QCoreApplication a(argc, argv);
 
     // First create the SmtpClient object and set the user and the password.
 
@@ -35,7 +36,6 @@ int main(int argc, char *argv[])
     message.setSender(new EmailAddress("your_email@gmail.com", "Your Name"));
     message.addRecipient(new EmailAddress("recipient@host.com", "Recipient's Name"));
     message.setSubject("SmtpClient for Qt - Example 3 - Html email with images");
-
 
     // Now we need to create a MimeHtml object for HTML content
     MimeHtml html;
@@ -63,10 +63,21 @@ int main(int argc, char *argv[])
     message.addPart(&image2);
 
     // Now the email can be sended
+    if (!smtp.connectToHost()) {
+        qDebug() << "Failed to connect to host!" << endl;
+        return -1;
+    }
 
-    smtp.connectToHost();
-    smtp.login();
-    smtp.sendMail(message);
+    if (!smtp.login()) {
+        qDebug() << "Failed to login!" << endl;
+        return -2;
+    }
+
+    if (!smtp.sendMail(message)) {
+        qDebug() << "Failed to send mail!" << endl;
+        return -3;
+    }
+
     smtp.quit();
 
 }

@@ -14,11 +14,10 @@
   See the LICENSE file for more details.
 */
 
-#include <QtGui/QApplication>
+#include <QtWidgets>
 
 #include "sendemail.h"
 #include "../../src/SmtpMime"
-
 
 #include <iostream>
 

@@ -1,11 +1,10 @@
-#include <QtGui/QApplication>
+#include <QtCore>
 
-#include "../src/SmtpMime"
-
+#include "../../src/SmtpMime"
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QCoreApplication a(argc, argv);
 
     // This is a first demo application of the SmtpClient for Qt project
 
@@ -44,9 +43,21 @@ int main(int argc, char *argv[])
 
     // Now we can send the mail
 
-    smtp.connectToHost();
-    smtp.login();
-    smtp.sendMail(message);
+    if (!smtp.connectToHost()) {
+        qDebug() << "Failed to connect to host!" << endl;
+        return -1;
+    }
+
+    if (!smtp.login()) {
+        qDebug() << "Failed to login!" << endl;
+        return -2;
+    }
+
+    if (!smtp.sendMail(message)) {
+        qDebug() << "Failed to send mail!" << endl;
+        return -3;
+    }
+
     smtp.quit();
 
 }

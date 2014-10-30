@@ -123,7 +123,7 @@ void SendEmail::on_sendEmail_clicked()
     else
     {
         QMessageBox okMessage (this);
-        okMessage.setText("The email was succesfully sended.");
+        okMessage.setText("The email was succesfully sent.");
         okMessage.exec();
     }
 
