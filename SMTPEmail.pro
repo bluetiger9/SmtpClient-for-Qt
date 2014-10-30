@@ -4,16 +4,19 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core network
 
 TARGET = SMTPEmail
 
-TEMPLATE = app
-# uncomment this to build a shared library
-#TEMPLATE = lib
-#CONFIG += dll
+# Build as an application
+#TEMPLATE = app
 
+# Build as a library
+TEMPLATE = lib
 DEFINES += SMTP_BUILD
+win32:CONFIG += dll
+
+QMAKE_CXXFLAGS += -fPIC
 
 SOURCES += \
     src/emailaddress.cpp \
@@ -27,7 +30,8 @@ SOURCES += \
     src/smtpclient.cpp \
     src/quotedprintable.cpp \
     src/mimemultipart.cpp \
-    src/mimecontentformatter.cpp
+    src/mimecontentformatter.cpp \
+    demos/demo1.cpp
 
 HEADERS  += \
     src/emailaddress.h \
