@@ -26,15 +26,19 @@ int main(int argc, char *argv[])
 
     SmtpClient smtp("smtp.gmail.com", 465, SmtpClient::SslConnection);
 
-    smtp.setUser("your_email@gmail.com");
+    smtp.setUser("your_email@host.com");
     smtp.setPassword("your_password");
 
     // Create a MimeMessage
 
     MimeMessage message;
 
-    message.setSender(new EmailAddress("your_email_address@gmail.com", "Your Name"));
-    message.addRecipient(new EmailAddress("recipient@host.com", "Recipient's Name"));
+    EmailAddress sender("your_email_address@host.com", "Your Name");
+    message.setSender(&sender);
+
+    EmailAddress to("recipient@host.com", "Recipient's Name");
+    message.addRecipient(&to);
+
     message.setSubject("SmtpClient for Qt - Demo");
 
     // Add some text
@@ -52,7 +56,8 @@ int main(int argc, char *argv[])
     message.addPart(&attachment);
 
     // Add an another attachment
-    message.addPart(new MimeAttachment(new QFile("document.pdf")));
+    MimeAttachment document(new QFile("document.pdf"));
+    message.addPart(&document);
 
     // Now we can send the mail
 

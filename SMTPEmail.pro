@@ -31,7 +31,6 @@ SOURCES += \
     src/quotedprintable.cpp \
     src/mimemultipart.cpp \
     src/mimecontentformatter.cpp \
-    demos/demo1.cpp
 
 HEADERS  += \
     src/emailaddress.h \

@@ -70,7 +70,7 @@ public:
     /* [2] Getters and Setters */
 
     const QString& getHost() const;
-    void setHost(QString &host);
+    void setHost(const QString &host);
 
     int getPort() const;
     void setPort(int port);
@@ -82,7 +82,7 @@ public:
     void setConnectionType(ConnectionType ct);
 
     const QString & getUser() const;
-    void setUser(const QString &host);
+    void setUser(const QString &user);
 
     const QString & getPassword() const;
     void setPassword(const QString &password);
@@ -175,7 +175,7 @@ signals:
 
     /* [7] Signals */
 
-    void smtpError(SmtpError e);
+    void smtpError(SmtpClient::SmtpError e);
 
     /* [7] --- */
 

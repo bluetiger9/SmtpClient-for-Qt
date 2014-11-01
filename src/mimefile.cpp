@@ -28,6 +28,7 @@ MimeFile::MimeFile(QFile *file)
     this->cName = QFileInfo(*file).fileName();
     this->cEncoding = Base64;
 }
+
 MimeFile::MimeFile(const QByteArray& stream, const QString& fileName)
 {
     this->cEncoding = Base64;

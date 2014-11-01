@@ -66,7 +66,7 @@ void SmtpClient::setAuthMethod(AuthMethod method)
     this->authMethod = method;
 }
 
-void SmtpClient::setHost(QString &host)
+void SmtpClient::setHost(const QString &host)
 {
     this->host = host;
 }
