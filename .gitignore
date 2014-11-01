@@ -3,3 +3,4 @@
 *.so.*
 Makefile
 moc_*.cpp
+*.pro.user*
