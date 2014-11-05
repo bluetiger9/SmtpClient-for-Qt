@@ -20,14 +20,13 @@
 
 QString QuotedPrintable::encode(const QByteArray &input)
 {
-    QString output;
-
-    char byte;
     static const char hex[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+
+    QString output;
 
     for (int i = 0; i < input.length() ; ++i)
     {
-        byte = input[i];
+        const char byte = input[i];
 
         if ((byte == 0x20) || ((byte >= 33) && (byte <= 126) && (byte != 61))) {
             output.append(byte);

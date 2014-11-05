@@ -140,7 +140,7 @@ const QList<MimePart*> & MimeMessage::getParts() const
 
 /* [3] Public Methods */
 
-QString MimeMessage::toString()
+QString MimeMessage::toString() const
 {
     QBuffer out;
     out.open(QIODevice::WriteOnly);
@@ -168,7 +168,7 @@ QByteArray MimeMessage::formatAddress(EmailAddress *address, MimePart::Encoding 
     return result;
 }
 
-void MimeMessage::writeToDevice(QIODevice &out) {
+void MimeMessage::writeToDevice(QIODevice &out) const {
     /* =========== MIME HEADER ============ */
 
     /* ---------- Sender / From ----------- */

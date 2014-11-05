@@ -28,16 +28,14 @@
 
 SmtpClient::SmtpClient(const QString & host, int port, ConnectionType connectionType) :
     state(UnconnectedState),
+    host(host),
+    port(port),
     name("localhost"),
-    authMethod(AuthPlain),
     isReadyConnected(false),
     isAuthenticated(false),
     isMailSent(false)
 {
     setConnectionType(connectionType);
-
-    this->host = host;
-    this->port = port;
 
     connect(socket, SIGNAL(stateChanged(QAbstractSocket::SocketState)),
             this, SLOT(socketStateChanged(QAbstractSocket::SocketState)));
@@ -53,80 +51,12 @@ SmtpClient::~SmtpClient() {}
 
 
 /* [2] Getters and Setters */
-
-/**
- * @brief Sets the username to the specified value.
- */
-void SmtpClient::setUser(const QString &user)
-{
-    this->user = user;
-}
-
-/**
- * @brief Sets the password to the specified value
- */
-void SmtpClient::setPassword(const QString &password)
-{
-    this->password = password;
-}
-
-/**
- * @brief Changes the authentication method to the specified.
- */
-void SmtpClient::setAuthMethod(AuthMethod method)
-{
-    this->authMethod = method;
-}
-
-/**
- * @brief Sets the host of connection.
- * @deprecated Use the constructor.
- */
-void SmtpClient::setHost(QString &host)
-{
-    this->host = host;
-}
-
-/**
- * @brief Sets the connection port to the specified value.
- * @param port
- * @deprecated Use the constructor.
- */
-void SmtpClient::setPort(int port)
-{
-    this->port = port;
-}
-
 /**
  * @brief Returns the host name of the server.
  */
 const QString& SmtpClient::getHost() const
 {
     return this->host;
-}
-
-/**
- * @brief Returns the username used for authenticating.
- */
-const QString& SmtpClient::getUser() const
-{
-    return this->user;
-}
-
-/**
- * @brief Returns the password used for authenticating.
- */
-const QString& SmtpClient::getPassword() const
-{
-    return this->password;
-}
-
-/**
- * @brief Returns the authentication method used.
- */
-SmtpClient::AuthMethod SmtpClient::getAuthMethod() const
-{
-    return this->authMethod;
 }
 
 /**
@@ -191,45 +121,38 @@ QTcpSocket* SmtpClient::getSocket() {
 
 /* [3] Public methods */
 
-bool SmtpClient::connectToHost()
+void SmtpClient::connectToHost()
 {
     if (state != UnconnectedState)
-        return false;
+        return;
 
     changeState(ConnectingState);
-    return true;
 }
 
-bool SmtpClient::login()
+void SmtpClient::login()
 {
     if (!isReadyConnected || isAuthenticated)
-        return false;
+        return;
 
     changeState(AuthenticatingState);
-    return true;
 }
 
-bool SmtpClient::login(const QString &user, const QString &password, AuthMethod method)
+void SmtpClient::login(const QString &user, const QString &password, AuthMethod method)
 {
-    this->user = user;
-    this->password = password;
-    this->authMethod = method;
-    clearUserDataAfterLogin = true;
-    return login();
+    this->authInfo = AuthInfo(user, password, method);
+    login();
 }
 
-bool SmtpClient::sendMail(MimeMessage& email)
+void SmtpClient::sendMail(const MimeMessage & email)
 {
     if (!isReadyConnected)
-        return false;
+        return;
 
     isMailSent = false;
 
     this->email = &email;
     this->rcptType = 0;
     changeState(MailSendingState);
-
-    return true;
 }
 
 void SmtpClient::quit()
@@ -340,7 +263,7 @@ void SmtpClient::changeState(SmtpClient::ClientState state) {
 
     case AuthenticatingState:
         isAuthenticated = false;
-        changeState(authMethod == AuthPlain ? _AUTH_PLAIN_0 : _AUTH_LOGIN_0);
+        changeState(authInfo.authMethod == AuthPlain ? _AUTH_PLAIN_0 : _AUTH_LOGIN_0);
         break;
 
     case MailSendingState:
@@ -390,8 +313,8 @@ void SmtpClient::changeState(SmtpClient::ClientState state) {
     /* --- AUTH --- */
     case _AUTH_PLAIN_0:
         // Sending command: AUTH PLAIN base64('\0' + username + '\0' + password)
-        sendMessage("AUTH PLAIN " + QByteArray().append((char) 0).append(user)
-                    .append((char) 0).append(password).toBase64());
+        sendMessage("AUTH PLAIN " + QByteArray().append((char) 0).append(authInfo.username)
+                    .append((char) 0).append(authInfo.password).toBase64());
         break;
 
     case _AUTH_LOGIN_0:
@@ -400,20 +323,17 @@ void SmtpClient::changeState(SmtpClient::ClientState state) {
 
     case _AUTH_LOGIN_1_USER:
         // Send the username in base64
-        sendMessage(QByteArray().append(user).toBase64());
+        sendMessage(QByteArray().append(authInfo.username).toBase64());
         break;
 
     case _AUTH_LOGIN_2_PASS:
         // Send the password in base64
-        sendMessage(QByteArray().append(password).toBase64());
+        sendMessage(QByteArray().append(authInfo.password).toBase64());
         break;
 
     case _READY_Authenticated:
         isAuthenticated = true;
-        if (clearUserDataAfterLogin) {
-            password = ""; user = "";
-            clearUserDataAfterLogin = false;
-        }
+        authInfo = AuthInfo();
         changeState(ReadyState);
         emit authenticated();
         break;
@@ -425,6 +345,7 @@ void SmtpClient::changeState(SmtpClient::ClientState state) {
 
     case _MAIL_1_RCPT_INIT:
         rcptType++;
+        const QList<EmailAddress*> *addressList;
         switch (rcptType)
         {
         case _TO:
@@ -441,11 +362,12 @@ void SmtpClient::changeState(SmtpClient::ClientState state) {
             return;
         }
         addressIt = addressList->constBegin();
+        addressItEnd = addressList->constEnd();
         changeState(_MAIL_2_RCPT);
         break;
 
     case _MAIL_2_RCPT:
-        if (addressIt != addressList->end()) {
+        if (addressIt != addressItEnd) {
             sendMessage("RCPT TO: <" + (*addressIt)->getAddress() + ">");
             addressIt++;
         } else {

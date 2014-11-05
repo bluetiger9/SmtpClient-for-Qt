@@ -50,9 +50,8 @@ const QString & MimeText::getText() const
 
 /* [3] Protected Methods */
 
-void MimeText::writeContent(QIODevice &device) {
-    this->content = text.toLocal8Bit();
-    MimePart::writeContent(device);
+void MimeText::writeContent(QIODevice &device) const {
+    MimePart::writeContent(device, text.toLocal8Bit());
 }
 
 /* [3] --- */

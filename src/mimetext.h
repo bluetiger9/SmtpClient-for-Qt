@@ -52,7 +52,7 @@ protected:
 
     /* [4] Protected methods */
 
-    void writeContent(QIODevice &device);
+    void writeContent(QIODevice &device) const;
 
     /* [4] --- */
 

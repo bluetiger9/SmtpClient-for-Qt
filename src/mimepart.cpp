@@ -131,7 +131,7 @@ int MimePart::getMaxLineLength() const {
 
 /* [3] Public methods */
 
-QString MimePart::toString()
+QString MimePart::toString() const
 {
     QBuffer out;
     out.open(QIODevice::WriteOnly);
@@ -139,7 +139,7 @@ QString MimePart::toString()
     return QString(out.buffer());
 }
 
-void MimePart::writeToDevice(QIODevice &device) {
+void MimePart::writeToDevice(QIODevice &device) const {
     QString header;
 
     /* === Header Prepare === */
@@ -203,7 +203,11 @@ void MimePart::writeToDevice(QIODevice &device) {
 
 /* [4] Protected methods */
 
-void MimePart::writeContent(QIODevice &device) {
+void MimePart::writeContent(QIODevice &device) const {
+    this->writeContent(device, content);
+}
+
+void MimePart::writeContent(QIODevice &device, const QByteArray &content) const {
     switch (cEncoding)
     {
     case _7Bit:

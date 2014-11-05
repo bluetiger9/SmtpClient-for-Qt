@@ -69,8 +69,8 @@ public:
 
     /* [3] Public methods */
 
-    virtual QString toString();
-    void writeToDevice(QIODevice &device);
+    virtual QString toString() const;
+    void writeToDevice(QIODevice &device) const;
 
     /* [3] --- */
 

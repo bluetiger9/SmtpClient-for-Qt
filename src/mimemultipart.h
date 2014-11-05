@@ -60,7 +60,7 @@ public:
 
     void addPart(MimePart *part);
 
-    void writeContent(QIODevice &device);
+    void writeContent(QIODevice &device) const;
 
     /* [3] --- */
 

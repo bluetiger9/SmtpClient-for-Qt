@@ -82,8 +82,8 @@ public:
 
     /* [3] Public methods */
 
-    virtual QString toString();
-    void writeToDevice(QIODevice &device);
+    virtual QString toString() const;
+    void writeToDevice(QIODevice &device) const;
 
     /* [3] --- */
 
@@ -108,7 +108,8 @@ protected:
 
     /* [4] --- */
 
-    virtual void writeContent(QIODevice &device);
+    virtual void writeContent(QIODevice &device) const;
+    void writeContent(QIODevice &device, const QByteArray &content) const;
 };
 
 #endif // MIMEPART_H

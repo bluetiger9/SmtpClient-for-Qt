@@ -54,10 +54,10 @@ const QList<MimePart*> & MimeMultiPart::getParts() const {
     return parts;
 }
 
-void MimeMultiPart::writeContent(QIODevice &device) {
-    QList<MimePart*>::iterator it;
+void MimeMultiPart::writeContent(QIODevice &device) const {
+    QList<MimePart*>::const_iterator it;
 
-    for (it = parts.begin(); it != parts.end(); it++) {
+    for (it = parts.constBegin(); it != parts.constEnd(); it++) {
         device.write("--" );
         device.write(cBoundary.toLatin1());
         device.write("\r\n");

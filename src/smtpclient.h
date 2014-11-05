@@ -112,24 +112,11 @@ public:
     /* [2] Getters and Setters */
 
     const QString& getHost() const;
-    void setHost(QString &host);
-
     int getPort() const;
-    void setPort(int port);
+    ConnectionType getConnectionType() const;
 
     const QString& getName() const;
     void setName(const QString &name);
-
-    ConnectionType getConnectionType() const;
-
-    const QString & getUser() const;
-    void setUser(const QString &host);
-
-    const QString & getPassword() const;
-    void setPassword(const QString &password);
-
-    SmtpClient::AuthMethod getAuthMethod() const;
-    void setAuthMethod(AuthMethod method);
 
     const QString & getResponseText() const;
     int getResponseCode() const;
@@ -141,11 +128,9 @@ public:
 
     /* [3] Public methods */
 
-    bool connectToHost();
-    bool login();
-    bool login(const QString &user, const QString &password,
-               AuthMethod method = AuthLogin);
-    bool sendMail(MimeMessage& email);
+    void connectToHost();
+    void login(const QString &user, const QString &password, AuthMethod method = AuthLogin);
+    void sendMail(const MimeMessage & email);
     void quit();
 
     bool waitForReadyConnected(int msec = 30000);
@@ -158,19 +143,25 @@ protected:
 
     /* [4] Protected members */
 
+    struct AuthInfo {
+        QString username;
+        QString password;
+        AuthMethod authMethod;
+
+        AuthInfo(const QString & username = "", const QString &password = "", AuthMethod authMethod = AuthPlain) :
+            username(username), password(password), authMethod(authMethod) {}
+    };
+
     QTcpSocket *socket;
     ClientState state;
-    bool syncMode;
 
-    QString host;
-    int port;
+    const QString host;
+    const int port;
     ConnectionType connectionType;
+
     QString name;
 
-    QString user;
-    QString password;
-    AuthMethod authMethod;
-    bool clearUserDataAfterLogin;
+    AuthInfo authInfo;
 
     QString responseText;
     QString tempResponse;
@@ -180,17 +171,19 @@ protected:
     bool isAuthenticated;
     bool isMailSent;
 
-    MimeMessage *email;
-    QList<EmailAddress*>::const_iterator addressIt;
-    const QList<EmailAddress*> *addressList;
+    const MimeMessage *email;
 
     int rcptType;
     enum _RcptType { _TO = 1, _CC = 2, _BCC = 3};
+
+    QList<EmailAddress*>::const_iterator addressIt;
+    QList<EmailAddress*>::const_iterator addressItEnd;
 
     /* [4] --- */
 
 
     /* [5] Protected methods */
+    void login();
     void setConnectionType(ConnectionType ct);
     void changeState(ClientState state);
     void processResponse();

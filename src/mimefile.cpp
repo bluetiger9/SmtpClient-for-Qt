@@ -45,14 +45,12 @@ MimeFile::~MimeFile()
 /* [3] Protected methods */
 
 
-void MimeFile::writeContent(QIODevice &device) {
-    file->open(QIODevice::ReadOnly);
-    this->content = file->readAll();
+void MimeFile::writeContent(QIODevice &device) const {
+    file->open(QIODevice::ReadOnly);    
+    const QByteArray &fileContent = file->readAll();
     file->close();
 
-    MimePart::writeContent(device);
-
-    this->content.clear();
+    MimePart::writeContent(device, fileContent);
 }
 
 /* [3] --- */
