@@ -21,8 +21,6 @@
 
 #include "../../src/SmtpMime"
 
-
-
 namespace Ui {
     class SendEmail;
 }

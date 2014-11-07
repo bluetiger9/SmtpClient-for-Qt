@@ -102,20 +102,23 @@ void SendEmail::on_sendEmail_clicked()
         message.addPart(new MimeAttachment(new QFile(ui->attachments->item(i)->text())));
     }
 
-    if (!smtp.connectToHost())
+    smtp.connectToHost();
+    if (!smtp.waitForReadyConnected())
     {
         errorMessage("Connection Failed");
         return;
     }
 
     if (auth)
-        if (!smtp.login(user, password))
+        smtp.login(user, password);
+        if (!smtp.waitForAuthenticated())
         {
             errorMessage("Authentification Failed");
             return;
         }
 
-    if (!smtp.sendMail(message))
+    smtp.sendMail(message);
+    if (!smtp.waitForMailSent())
     {
         errorMessage("Mail sending failed");
         return;
@@ -123,7 +126,7 @@ void SendEmail::on_sendEmail_clicked()
     else
     {
         QMessageBox okMessage (this);
-        okMessage.setText("The email was succesfully sended.");
+        okMessage.setText("The email was succesfully sent.");
         okMessage.exec();
     }
 
