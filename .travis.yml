@@ -6,5 +6,5 @@ before_install:
 
 script:
  - qmake -project
- - qmake Ultron.pro
+ - qmake src/SMTPEmail.pro
  - make
