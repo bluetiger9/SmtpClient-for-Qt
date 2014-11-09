@@ -38,7 +38,7 @@ public:
 
     void setHtml(const QString & html);
 
-    const QString& getHtml() const;
+    QString getHtml() const;
 
     /* [2] --- */
 

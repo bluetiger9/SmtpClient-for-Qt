@@ -43,7 +43,9 @@ MimeMultiPart::MimeMultiPart(MultiPartType type)
 }
 
 MimeMultiPart::~MimeMultiPart() {
-
+    foreach (MimePart *part, parts) {
+        delete part;
+    }
 }
 
 void MimeMultiPart::addPart(MimePart *part) {

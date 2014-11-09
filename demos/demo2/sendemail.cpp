@@ -37,7 +37,7 @@ SendEmail::~SendEmail()
     delete ui;
 }
 
-EmailAddress* SendEmail::stringToEmail(const QString &str)
+EmailAddress SendEmail::stringToEmail(const QString &str)
 {
     int p1 = str.indexOf("<");
     int p2 = str.indexOf(">");
@@ -45,11 +45,11 @@ EmailAddress* SendEmail::stringToEmail(const QString &str)
     if (p1 == -1)
     {
         // no name, only email address
-        return new EmailAddress(str);
+        return EmailAddress(str);
     }
     else
     {
-        return new EmailAddress(str.mid(p1 + 1, p2 - p1 - 1), str.left(p1));
+        return EmailAddress(str.mid(p1 + 1, p2 - p1 - 1), str.left(p1));
     }
 
 }
@@ -59,11 +59,8 @@ void SendEmail::on_addAttachment_clicked()
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::ExistingFiles);
 
-
     if (dialog.exec())
         ui->attachments->addItems(dialog.selectedFiles());
-
-
 }
 
 void SendEmail::on_sendEmail_clicked()
@@ -75,7 +72,7 @@ void SendEmail::on_sendEmail_clicked()
     QString user = ui->username->text();
     QString password = ui->password->text();
 
-    EmailAddress *sender = stringToEmail(ui->sender->text());
+    EmailAddress sender = stringToEmail(ui->sender->text());
 
     QStringList rcptStringList = ui->recipients->text().split(';');
 

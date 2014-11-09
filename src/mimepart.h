@@ -51,25 +51,25 @@ public:
 
     /* [2] Getters and Setters */
 
-    const QString& getHeader() const;
-    const QByteArray& getContent() const;
-
     void setContent(const QByteArray & content);
+    QByteArray getContent() const;
+
     void setHeader(const QString & headerLines);
+    QString getHeader() const;
 
     void addHeaderLine(const QString & line);
 
     void setContentId(const QString & cId);
-    const QString & getContentId() const;
+    QString getContentId() const;
 
     void setContentName(const QString & cName);
-    const QString & getContentName() const;
+    QString getContentName() const;
 
     void setContentType(const QString & cType);
-    const QString & getContentType() const;
+    QString getContentType() const;
 
     void setCharset(const QString & charset);
-    const QString & getCharset() const;
+    QString getCharset() const;
 
     void setEncoding(Encoding enc);
     Encoding getEncoding() const;

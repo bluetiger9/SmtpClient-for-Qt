@@ -4,7 +4,6 @@ MimeBase64Formatter::MimeBase64Formatter(QIODevice *out) :
     MimeContentFormatter(out) {}
 
 qint64 MimeBase64Formatter::writeData(const char *data, qint64 maxLength) {
-    qDebug("called");
     int lines = (maxLength - 1) / lineLength + 1;
     for (int i = 1; i < lines; ++i) {
         output->write(data, lineLength);

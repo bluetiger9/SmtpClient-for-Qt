@@ -33,7 +33,7 @@ public:
     explicit SendEmail(QWidget *parent = 0);
     ~SendEmail();
 
-    static EmailAddress * stringToEmail(const QString & str);
+    static EmailAddress stringToEmail(const QString & str);
 
 private slots:
     void on_addAttachment_clicked();

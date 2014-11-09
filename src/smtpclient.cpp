@@ -33,7 +33,8 @@ SmtpClient::SmtpClient(const QString & host, int port, ConnectionType connection
     name("localhost"),
     isReadyConnected(false),
     isAuthenticated(false),
-    isMailSent(false)
+    isMailSent(false),
+    isReset(false)
 {
     setConnectionType(connectionType);
 
@@ -54,7 +55,7 @@ SmtpClient::~SmtpClient() {}
 /**
  * @brief Returns the host name of the server.
  */
-const QString& SmtpClient::getHost() const
+QString SmtpClient::getHost() const
 {
     return this->host;
 }
@@ -78,7 +79,7 @@ SmtpClient::ConnectionType SmtpClient::getConnectionType() const
 /**
  * @brief Returns the client's name.
  */
-const QString& SmtpClient::getName() const
+QString SmtpClient::getName() const
 {
     return this->name;
 }
@@ -94,7 +95,7 @@ void SmtpClient::setName(const QString &name)
 /**
  * @brief Returns the last response of the server.
  */
-const QString & SmtpClient::getResponseText() const
+QString SmtpClient::getResponseText() const
 {
     return responseText;
 }
@@ -160,19 +161,24 @@ void SmtpClient::quit()
     changeState(DisconnectingState);
 }
 
+void SmtpClient::reset()
+{
+    if (!isReadyConnected)
+        return;
+
+    isReset = false;
+
+    changeState(ResetState);
+}
 
 bool SmtpClient::waitForReadyConnected(int msec) {
     if (state == UnconnectedState)
         return false;
 
-    QEventLoop loop;
-    QObject::connect(this, SIGNAL(readyConnected()), &loop, SLOT(quit()));
-
     if (isReadyConnected)
         return true;
 
-    QTimer::singleShot(msec, &loop, SLOT(quit()));
-    loop.exec();
+    waitForEvent(msec, SIGNAL(readyConnected()));
 
     return isReadyConnected;
 }
@@ -181,14 +187,10 @@ bool SmtpClient::waitForAuthenticated(int msec) {
     if (!isReadyConnected)
         return false;
 
-    QEventLoop loop;
-    QObject::connect(this, SIGNAL(authenticated()), &loop, SLOT(quit()));
-
     if (isAuthenticated)
         return true;
 
-    QTimer::singleShot(msec, &loop, SLOT(quit()));
-    loop.exec();
+    waitForEvent(msec, SIGNAL(authenticated()));
 
     return isAuthenticated;
 }
@@ -197,16 +199,25 @@ bool SmtpClient::waitForMailSent(int msec) {
     if (!isReadyConnected)
         return false;
 
-    QEventLoop loop;
-    QObject::connect(this, SIGNAL(mailSent()), &loop, SLOT(quit()));
-
     if (isMailSent)
         return true;
 
-    QTimer::singleShot(msec, &loop, SLOT(quit()));    
-    loop.exec();
+    waitForEvent(msec, SIGNAL(mailSent()));
 
     return isMailSent;
+}
+
+bool SmtpClient::waitForReset(int msec)
+{
+    if (!isReadyConnected)
+        return false;
+
+    if (isReset)
+        return true;
+
+    waitForEvent(msec, SIGNAL(mailReset()));
+
+    return isReset;
 }
 
 /* [3] --- */
@@ -276,8 +287,12 @@ void SmtpClient::changeState(SmtpClient::ClientState state) {
         socket->disconnectFromHost();
         break;
 
+    case ResetState:
+        sendMessage("RSET");
+        break;
+
     case _EHLO_State:
-        // Service ready. Send EHLO message and chage the state
+        // Service ready. Send EHLO message and change the state
         sendMessage("EHLO " + name);
         break;
 
@@ -345,7 +360,7 @@ void SmtpClient::changeState(SmtpClient::ClientState state) {
 
     case _MAIL_1_RCPT_INIT:
         rcptType++;
-        const QList<EmailAddress*> *addressList;
+        const QList<EmailAddress> *addressList;
         switch (rcptType)
         {
         case _TO:
@@ -368,7 +383,7 @@ void SmtpClient::changeState(SmtpClient::ClientState state) {
 
     case _MAIL_2_RCPT:
         if (addressIt != addressItEnd) {
-            sendMessage("RCPT TO: <" + (*addressIt)->getAddress() + ">");
+            sendMessage("RCPT TO: <" + addressIt->getAddress() + ">");
             addressIt++;
         } else {
             changeState(_MAIL_1_RCPT_INIT);
@@ -407,15 +422,26 @@ void SmtpClient::processResponse() {
     case ConnectedState:
         // Just connected to the server. Wait for 220 (Service ready)
         if (responseCode != 220) {
-            emit error(ServerError); return;
+            emitError(ServerError);
+            return;
         }
         changeState(_EHLO_State);
+        break;
+
+    case ResetState:
+        if (responseCode != 250) {
+            emitError(ServerError);
+            return;
+        }
+        emit mailReset();
+        changeState(ReadyState);
         break;
 
     case _EHLO_State:
         // The response code needs to be 250.
         if (responseCode != 250) {
-            emit error(ServerError); return;
+            emitError(ServerError);
+            return;
         }
 
         changeState((connectionType != TlsConnection) ? _READY_Connected : _TLS_State);
@@ -425,7 +451,7 @@ void SmtpClient::processResponse() {
     case _TLS_0_STARTTLS:
         // The response code needs to be 220.
         if (responseCode != 220) {
-            emit error(ServerError);
+            emitError(ServerError);
             return;
         }
         changeState(_TLS_1_ENCRYPT);
@@ -434,7 +460,7 @@ void SmtpClient::processResponse() {
     case _TLS_2_EHLO:
         // The response code needs to be 250.
         if (responseCode != 250) {
-            emit error(ServerError);
+            emitError(ServerError);
             return;
         }
         changeState(_READY_Encrypted);
@@ -444,7 +470,7 @@ void SmtpClient::processResponse() {
     case _AUTH_PLAIN_0:
         // If the response is not 235 then the authentication was failed
         if (responseCode != 235) {
-            emit error(AuthenticationError);
+            emitError(AuthenticationError);
             return;
         }
         changeState(_READY_Authenticated);
@@ -452,7 +478,7 @@ void SmtpClient::processResponse() {
 
     case _AUTH_LOGIN_0:
         if (responseCode != 334) {
-            emit error(AuthenticationError);
+            emitError(AuthenticationError);
             return;
         }
         changeState(_AUTH_LOGIN_1_USER);
@@ -460,7 +486,7 @@ void SmtpClient::processResponse() {
 
     case _AUTH_LOGIN_1_USER:
         if (responseCode != 334) {
-            emit error(AuthenticationError);
+            emitError(AuthenticationError);
             return;
         }
         changeState(_AUTH_LOGIN_2_PASS);
@@ -468,7 +494,7 @@ void SmtpClient::processResponse() {
 
     case _AUTH_LOGIN_2_PASS:
         if (responseCode != 235) {
-            emit error(AuthenticationError);
+            emitError(AuthenticationError);
             return;
         }
         changeState(_READY_Authenticated);
@@ -477,7 +503,7 @@ void SmtpClient::processResponse() {
     /* --- MAIL --- */
     case _MAIL_0_FROM:
         if (responseCode != 250) {
-            emit error(MailSendingError);
+            emitError(MailSendingError);
             return;
         }
         changeState(_MAIL_1_RCPT_INIT);
@@ -485,7 +511,7 @@ void SmtpClient::processResponse() {
 
     case _MAIL_2_RCPT:
         if (responseCode != 250) {
-            emit error(MailSendingError);
+            emitError(MailSendingError);
             return;
         }
         changeState(_MAIL_2_RCPT);
@@ -493,7 +519,7 @@ void SmtpClient::processResponse() {
 
     case _MAIL_3_DATA:
         if (responseCode != 354) {
-            emit error(MailSendingError);
+            emitError(MailSendingError);
             return;
         }
         changeState(_MAIL_4_SEND_DATA);
@@ -501,7 +527,7 @@ void SmtpClient::processResponse() {
 
     case _MAIL_4_SEND_DATA:
         if (responseCode != 250) {
-            emit error(MailSendingError);
+            emitError(MailSendingError);
             return;
         }
         changeState(_READY_MailSent);
@@ -521,6 +547,28 @@ void SmtpClient::sendMessage(const QString &text)
 
     socket->flush();
     socket->write(text.toUtf8() + "\r\n");
+}
+
+void SmtpClient::emitError(SmtpClient::SmtpError e)
+{
+    emit error(e);
+}
+
+void SmtpClient::waitForEvent(int msec, const char *successSignal)
+{
+    QEventLoop loop;
+    QObject::connect(this, successSignal, &loop, SLOT(quit()));
+    QObject::connect(this, SIGNAL(error(SmtpClient::SmtpError)), &loop, SLOT(quit()));
+
+    if(msec > 0)
+    {
+        QTimer timer;
+        timer.setSingleShot(true);
+        connect(&timer, SIGNAL(timeout()), &loop, SLOT(quit()));
+        timer.start(msec);
+    }
+
+    loop.exec();
 }
 
 /* [4] --- */
@@ -551,8 +599,6 @@ void SmtpClient::socketStateChanged(QAbstractSocket::SocketState state) {
 void SmtpClient::socketError(QAbstractSocket::SocketError socketError) {
 #ifndef QT_NO_DEBUG
     qDebug() << "[Socket] ERROR:" << socketError;
-#else
-    Q_UNUSED(socketError);
 #endif
     emit error(SocketError);
 }
@@ -583,13 +629,13 @@ void SmtpClient::socketReadyRead()
 
         // Check for server error
         if (responseCode / 100 == 4) {
-            emit error(ServerError);
+            emitError(ServerError);
             return;
         }
 
         // Check for client error
         if (responseCode / 100 == 5) {
-            emit error(ClientError);
+            emitError(ClientError);
             return;
         }
 

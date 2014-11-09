@@ -66,6 +66,7 @@ public:
         AuthenticatingState = 4,
         MailSendingState = 5,
         DisconnectingState = 6,
+        ResetState = 7,
 
         /* Internal States */
         _EHLO_State = 50,
@@ -102,7 +103,7 @@ public:
 
     /* [1] Constructors and Destructors */
 
-    SmtpClient(const QString & host = "locahost", int port = 25, ConnectionType ct = TcpConnection);
+    SmtpClient(const QString & host = "localhost", int port = 25, ConnectionType ct = TcpConnection);
 
     ~SmtpClient();
 
@@ -111,14 +112,14 @@ public:
 
     /* [2] Getters and Setters */
 
-    const QString& getHost() const;
+    QString getHost() const;
     int getPort() const;
     ConnectionType getConnectionType() const;
 
-    const QString& getName() const;
+    QString getName() const;
     void setName(const QString &name);
 
-    const QString & getResponseText() const;
+    QString getResponseText() const;
     int getResponseCode() const;
 
     QTcpSocket* getSocket();
@@ -132,10 +133,15 @@ public:
     void login(const QString &user, const QString &password, AuthMethod method = AuthLogin);
     void sendMail(const MimeMessage & email);
     void quit();
+    void reset();
+
+    bool isConnected();
+    bool isLogged();
 
     bool waitForReadyConnected(int msec = 30000);
     bool waitForAuthenticated(int msec = 30000);
     bool waitForMailSent(int msec = 30000);
+    bool waitForReset(int msec = 30000);
 
     /* [3] --- */
 
@@ -170,14 +176,15 @@ protected:
     bool isReadyConnected;
     bool isAuthenticated;
     bool isMailSent;
+    bool isReset;
 
     const MimeMessage *email;
 
     int rcptType;
     enum _RcptType { _TO = 1, _CC = 2, _BCC = 3};
 
-    QList<EmailAddress*>::const_iterator addressIt;
-    QList<EmailAddress*>::const_iterator addressItEnd;
+    QList<EmailAddress>::const_iterator addressIt;
+    QList<EmailAddress>::const_iterator addressItEnd;
 
     /* [4] --- */
 
@@ -188,6 +195,8 @@ protected:
     void changeState(ClientState state);
     void processResponse();
     void sendMessage(const QString &text);
+    void emitError(SmtpClient::SmtpError e);
+    void waitForEvent(int msec, const char *successSignal);
 
     /* [5] --- */
 
@@ -213,6 +222,7 @@ signals:
     void readyConnected();
     void authenticated();
     void mailSent();
+    void mailReset();
     void disconnected();
 
     /* [7] --- */

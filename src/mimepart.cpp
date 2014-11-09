@@ -58,12 +58,12 @@ void MimePart::addHeaderLine(const QString & line)
     this->headerLines += line + "\r\n";
 }
 
-const QString& MimePart::getHeader() const
+QString MimePart::getHeader() const
 {
     return headerLines;
 }
 
-const QByteArray& MimePart::getContent() const
+QByteArray MimePart::getContent() const
 {
     return content;
 }
@@ -73,7 +73,7 @@ void MimePart::setContentId(const QString & cId)
     this->cId = cId;
 }
 
-const QString & MimePart::getContentId() const
+QString MimePart::getContentId() const
 {
     return this->cId;
 }
@@ -83,7 +83,7 @@ void MimePart::setContentName(const QString & cName)
     this->cName = cName;
 }
 
-const QString & MimePart::getContentName() const
+QString MimePart::getContentName() const
 {
     return this->cName;
 }
@@ -93,7 +93,7 @@ void MimePart::setContentType(const QString & cType)
     this->cType = cType;
 }
 
-const QString & MimePart::getContentType() const
+QString MimePart::getContentType() const
 {
     return this->cType;
 }
@@ -103,7 +103,7 @@ void MimePart::setCharset(const QString & charset)
     this->cCharset = charset;
 }
 
-const QString & MimePart::getCharset() const
+QString MimePart::getCharset() const
 {
     return this->cCharset;
 }

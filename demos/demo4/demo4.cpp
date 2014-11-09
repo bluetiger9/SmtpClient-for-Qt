@@ -27,10 +27,10 @@ int main(int argc, char *argv[])
     MimeMessage message;
 
     EmailAddress sender("your_email_address@host.com", "Your Name");
-    message.setSender(&sender);
+    message.setSender(sender);
 
     EmailAddress to("recipient@host.com", "Recipient's Name");
-    message.addRecipient(&to);
+    message.addRecipient(to);
 
     message.setSubject("SmtpClient for Qt - Example 3 - Html email with images");
 
