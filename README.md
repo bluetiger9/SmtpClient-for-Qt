@@ -1,3 +1,5 @@
+[![Qt Pods](http://qt-pods.org/assets/logo.png "Qt Pods")](http://qt-pods.org)
+
 SMTP Client for Qt (C++) - Version 1.1
 =============================================
 
@@ -6,29 +8,24 @@ The SmtpClient for Qt is small library writen for Qt 4 (C++ version) that allows
 ##New in version 1.1:
 
 - TLS (STARTTLS) connection is now supported
-
 - multiple types of recipients (to, cc, bcc)
-
 - nested mime emails (mixed/alternative, mixed/related)
-
 - output compilant with RFC2045
 
 
 ## SMPT Client for Qt supports
 
 - TCP and SSL connections to SMTP servers
-
 - SMTP authentication (PLAIN and LOGIN methods)
-
 - sending MIME emails (to multiple recipients)
-
 - plain text and HTML (with inline files) content in emails
-
 - multiple attachments and inline files (used in HTML)
-
 - different character sets (ascii, utf-8, etc) and encoding methods (7bit, 8bit, base64)
-
 - error handling
+
+## Usage
+You can add QtSmtpClient to your project easily by using qt-pods.
+Read more about qt-pods here: https://github.com/cybercatalyst/qt-pods
 
 ## Examples
 
