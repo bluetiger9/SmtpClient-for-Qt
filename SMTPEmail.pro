@@ -16,8 +16,6 @@ TEMPLATE = lib
 DEFINES += SMTP_BUILD
 win32:CONFIG += dll
 
-QMAKE_CXXFLAGS += -fPIC
-
 SOURCES += \
     src/emailaddress.cpp \
     src/mimeattachment.cpp \
