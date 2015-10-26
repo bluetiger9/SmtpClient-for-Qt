@@ -25,12 +25,12 @@
 /* [1] Constructors and destructors */
 
 SmtpClient::SmtpClient(const QString & host, int port, ConnectionType connectionType) :
+    socket(NULL),
     name("localhost"),
     authMethod(AuthPlain),
     connectionTimeout(5000),
     responseTimeout(5000),
-    sendMessageTimeout(60000),
-    socket(NULL)
+    sendMessageTimeout(60000)
 {
     setConnectionType(connectionType);
 
@@ -332,7 +332,7 @@ bool SmtpClient::login(const QString &user, const QString &password, AuthMethod 
             }
         }
     }
-    catch (ResponseTimeoutException e)
+    catch (ResponseTimeoutException)
     {
         // Responce Timeout exceeded
         emit smtpError(AuthenticationFailedError);
@@ -428,7 +428,7 @@ void SmtpClient::quit()
 
 /* [4] Protected methods */
 
-void SmtpClient::waitForResponse() throw (ResponseTimeoutException)
+void SmtpClient::waitForResponse()
 {
     do {
         if (!socket->waitForReadyRead(responseTimeout))
@@ -455,7 +455,7 @@ void SmtpClient::waitForResponse() throw (ResponseTimeoutException)
     } while (true);
 }
 
-void SmtpClient::sendMessage(const QString &text) throw (SendMessageTimeoutException)
+void SmtpClient::sendMessage(const QString &text)
 {
     socket->write(text.toUtf8() + "\r\n");
     if (! socket->waitForBytesWritten(sendMessageTimeout))
@@ -470,11 +470,11 @@ void SmtpClient::sendMessage(const QString &text) throw (SendMessageTimeoutExcep
 
 /* [5] Slots for the socket's signals */
 
-void SmtpClient::socketStateChanged(QAbstractSocket::SocketState state)
+void SmtpClient::socketStateChanged(QAbstractSocket::SocketState /*state*/)
 {
 }
 
-void SmtpClient::socketError(QAbstractSocket::SocketError socketError)
+void SmtpClient::socketError(QAbstractSocket::SocketError /*socketError*/)
 {
 }
 
