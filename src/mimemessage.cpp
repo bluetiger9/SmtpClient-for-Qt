@@ -24,11 +24,12 @@
 
 /* [1] Constructors and Destructors */
 MimeMessage::MimeMessage(bool createAutoMimeContent) :
+    replyTo(Q_NULLPTR),
     hEncoding(MimePart::_8Bit)
 {
     if (createAutoMimeContent)
         this->content = new MimeMultiPart();
-    
+
     autoMimeContentCreated = createAutoMimeContent;
 }
 
@@ -56,6 +57,10 @@ void MimeMessage::setContent(MimePart *content) {
       delete (this->content);
     }
     this->content = content;
+}
+
+void MimeMessage::setReplyTo(EmailAddress* rto) {
+    replyTo = rto;
 }
 
 void MimeMessage::setSender(EmailAddress* e)
@@ -127,6 +132,10 @@ const QList<EmailAddress*> & MimeMessage::getRecipients(RecipientType type) cons
     }
 }
 
+const EmailAddress* MimeMessage::getReplyTo() const {
+    return replyTo;
+}
+
 const QString & MimeMessage::getSubject() const
 {
     return subject;
@@ -175,7 +184,7 @@ QString MimeMessage::toString()
     /* ---------------------------------- */
 
 
-    /* ------- Recipients / To ---------- */    
+    /* ------- Recipients / To ---------- */
     mime += "To:";
     QList<EmailAddress*>::iterator it;  int i;
     for (i = 0, it = recipientsTo.begin(); it != recipientsTo.end(); ++it, ++i)
@@ -245,9 +254,31 @@ QString MimeMessage::toString()
     default:
         mime += subject;
     }
+    mime += "\r\n";
     /* ---------------------------------- */
 
-    mime += "\r\n";
+    /* ---------- Reply-To -------------- */
+    if (replyTo) {
+        mime += "Reply-To: ";
+        if (replyTo->getName() != "")
+        {
+            switch (hEncoding)
+            {
+            case MimePart::Base64:
+                mime += " =?utf-8?B?" + QByteArray().append(replyTo->getName()).toBase64() + "?=";
+                break;
+            case MimePart::QuotedPrintable:
+                mime += " =?utf-8?Q?" + QuotedPrintable::encode(QByteArray().append(replyTo->getName())).replace(' ', "_").replace(':',"=3A") + "?=";
+                break;
+            default:
+                mime += " " + replyTo->getName();
+            }
+        }
+        mime += " <" + replyTo->getAddress() + ">\r\n";
+    }
+
+    /* ---------------------------------- */
+
     mime += "MIME-Version: 1.0\r\n";
 
     mime += content->toString();
