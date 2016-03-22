@@ -23,6 +23,7 @@
 #include "mimemultipart.h"
 #include "emailaddress.h"
 #include <QList>
+#include <QStringList>
 
 #include "smtpexports.h"
 
@@ -53,6 +54,8 @@ public:
     void addBcc(EmailAddress* rcpt);
     void setSubject(const QString & subject);
     void addPart(MimePart* part);
+    void addHeader(QString header);
+    void clearHeader();
 
     void setHeaderEncoding(MimePart::Encoding);
 
@@ -77,6 +80,7 @@ protected:
     /* [4] Protected members */
 
     EmailAddress* sender;
+    QStringList headers;
     QList<EmailAddress*> recipientsTo, recipientsCc, recipientsBcc;
     QString subject;
     MimePart *content;

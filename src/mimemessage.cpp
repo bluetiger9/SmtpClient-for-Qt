@@ -103,6 +103,16 @@ void MimeMessage::addPart(MimePart *part)
     };
 }
 
+void MimeMessage::addHeader(QString header)
+{
+    this->headers << header;
+}
+
+void MimeMessage::clearHeader()
+{
+    this->headers.clear();
+}
+
 void MimeMessage::setHeaderEncoding(MimePart::Encoding hEnc)
 {
     this->hEncoding = hEnc;
@@ -249,6 +259,10 @@ QString MimeMessage::toString()
 
     mime += "\r\n";
     mime += "MIME-Version: 1.0\r\n";
+    if(!this->headers.isEmpty())
+    {
+        mime += this->headers.join("\r\n") + "\r\n";
+    }
 
     mime += content->toString();
     return mime;
