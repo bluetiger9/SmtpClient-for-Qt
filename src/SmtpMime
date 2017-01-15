@@ -19,13 +19,13 @@
 #ifndef SMTPMIME_H
 #define SMTPMIME_H
 
-#include "smtpclient.h"
-#include "mimepart.h"
-#include "mimehtml.h"
-#include "mimeattachment.h"
-#include "mimemessage.h"
-#include "mimetext.h"
-#include "mimeinlinefile.h"
-#include "mimefile.h"
+#include "smtpmime_h/smtpclient.h"
+#include "smtpmime_h/mimepart.h"
+#include "smtpmime_h/mimehtml.h"
+#include "smtpmime_h/mimeattachment.h"
+#include "smtpmime_h/mimemessage.h"
+#include "smtpmime_h/mimetext.h"
+#include "smtpmime_h/mimeinlinefile.h"
+#include "smtpmime_h/mimefile.h"
 
 #endif // SMTPMIME_H
