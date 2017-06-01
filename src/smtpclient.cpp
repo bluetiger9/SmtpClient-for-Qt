@@ -355,7 +355,7 @@ void SmtpClient::changeState(SmtpClient::ClientState state) {
 
     /* --- MAIL --- */
     case _MAIL_0_FROM:
-        sendMessage("MAIL FROM: <" + email->getSender().getAddress() + ">");
+        sendMessage("MAIL FROM:<" + email->getSender().getAddress() + ">");
         break;
 
     case _MAIL_1_RCPT_INIT:
@@ -383,7 +383,7 @@ void SmtpClient::changeState(SmtpClient::ClientState state) {
 
     case _MAIL_2_RCPT:
         if (addressIt != addressItEnd) {
-            sendMessage("RCPT TO: <" + addressIt->getAddress() + ">");
+            sendMessage("RCPT TO:<" + addressIt->getAddress() + ">");
             addressIt++;
         } else {
             changeState(_MAIL_1_RCPT_INIT);
