@@ -61,6 +61,7 @@ void MimeMessage::setContent(MimePart *content) {
 void MimeMessage::setSender(EmailAddress* e)
 {
     this->sender = e;
+    e->setParent(this);
 }
 
 void MimeMessage::addRecipient(EmailAddress* rcpt, RecipientType type)
@@ -77,6 +78,8 @@ void MimeMessage::addRecipient(EmailAddress* rcpt, RecipientType type)
         recipientsBcc << rcpt;
         break;
     }
+
+    rcpt->setParent(this);
 }
 
 void MimeMessage::addTo(EmailAddress* rcpt) {

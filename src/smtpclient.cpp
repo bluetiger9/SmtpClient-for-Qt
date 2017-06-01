@@ -364,6 +364,7 @@ bool SmtpClient::sendMail(MimeMessage& email)
         // To (primary recipients)
         for (it = email.getRecipients().begin(), itEnd = email.getRecipients().end();
              it != itEnd; ++it)
+        {
 
             sendMessage("RCPT TO:<" + (*it)->getAddress() + ">");
             waitForResponse();
