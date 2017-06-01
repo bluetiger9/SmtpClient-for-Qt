@@ -53,6 +53,7 @@ public:
     void addBcc(EmailAddress* rcpt);
     void setSubject(const QString & subject);
     void addPart(MimePart* part);
+    void setReplyTo(EmailAddress* rto);
 
     void setHeaderEncoding(MimePart::Encoding);
 
@@ -60,6 +61,7 @@ public:
     const QList<EmailAddress*> & getRecipients(RecipientType type = To) const;
     const QString & getSubject() const;
     const QList<MimePart*> & getParts() const;
+    const EmailAddress* getReplyTo() const;
 
     MimePart& getContent();
     void setContent(MimePart *content);
@@ -77,11 +79,12 @@ protected:
     /* [4] Protected members */
 
     EmailAddress* sender;
+    EmailAddress* replyTo;
     QList<EmailAddress*> recipientsTo, recipientsCc, recipientsBcc;
     QString subject;
     MimePart *content;
     bool autoMimeContentCreated;
-    
+
     MimePart::Encoding hEncoding;
 
     /* [4] --- */

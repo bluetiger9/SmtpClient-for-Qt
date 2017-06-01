@@ -60,7 +60,7 @@ public:
 
     /* [1] Constructors and Destructors */
 
-    SmtpClient(const QString & host = "locahost", int port = 25, ConnectionType ct = TcpConnection);
+    SmtpClient(const QString & host = "localhost", int port = 25, ConnectionType ct = TcpConnection);
 
     ~SmtpClient();
 
@@ -154,9 +154,9 @@ protected:
 
     /* [5] Protected methods */
 
-    void waitForResponse() throw (ResponseTimeoutException);
+    void waitForResponse();
 
-    void sendMessage(const QString &text) throw (SendMessageTimeoutException);
+    void sendMessage(const QString &text);
 
     /* [5] --- */
 
