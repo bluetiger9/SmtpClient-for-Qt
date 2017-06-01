@@ -599,6 +599,8 @@ void SmtpClient::socketStateChanged(QAbstractSocket::SocketState state) {
 void SmtpClient::socketError(QAbstractSocket::SocketError socketError) {
 #ifndef QT_NO_DEBUG
     qDebug() << "[Socket] ERROR:" << socketError;
+#else
+    Q_UNUSED(socketError);
 #endif
     emit error(SocketError);
 }

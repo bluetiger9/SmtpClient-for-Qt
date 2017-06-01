@@ -107,12 +107,14 @@ void SendEmail::on_sendEmail_clicked()
     }
 
     if (auth)
+    {
         smtp.login(user, password);
         if (!smtp.waitForAuthenticated())
         {
             errorMessage("Authentification Failed");
             return;
         }
+    }
 
     smtp.sendMail(message);
     if (!smtp.waitForMailSent())
