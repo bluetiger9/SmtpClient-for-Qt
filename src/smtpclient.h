@@ -48,6 +48,17 @@ public:
         ClientError     // 5xx smtp error
     };
 
+    enum SmtpInfo
+    {
+        Connected,
+        Secured,
+        Authenticated,
+        Sending,
+        Sent,
+        Disconntected,
+        Finished
+    };
+
     enum ConnectionType
     {
         TcpConnection,
@@ -156,7 +167,7 @@ protected:
 
     void waitForResponse();
 
-    void sendMessage(const QString &text);
+    void sendMessage(const QString &text, bool reportProgress = false);
 
     /* [5] --- */
 
@@ -176,6 +187,8 @@ signals:
     /* [7] Signals */
 
     void smtpError(SmtpClient::SmtpError e);
+    void smtpSendProgress(qreal percentage);
+    void smtpInfo(SmtpClient::SmtpInfo i);
 
     /* [7] --- */
 

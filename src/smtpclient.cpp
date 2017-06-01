@@ -204,6 +204,8 @@ bool SmtpClient::connectToHost()
     {
         emit smtpError(ConnectionTimeoutError);
         return false;
+    } else {
+        emit smtpInfo(SmtpInfo::Connected);
     }
 
     try
@@ -275,6 +277,8 @@ bool SmtpClient::connectToHost()
         return false;
     }
 
+    emit smtpInfo(SmtpInfo::Secured);
+
     // If no errors occured the function returns true.
     return true;
 }
@@ -345,11 +349,15 @@ bool SmtpClient::login(const QString &user, const QString &password, AuthMethod 
         return false;
     }
 
+    emit smtpInfo(SmtpInfo::Authenticated);
+
     return true;
 }
 
 bool SmtpClient::sendMail(MimeMessage& email)
 {
+    emit smtpInfo(SmtpInfo::Sending);
+
     try
     {
         // Send the MAIL command with the sender
@@ -398,7 +406,7 @@ bool SmtpClient::sendMail(MimeMessage& email)
 
         if (responseCode != 354) return false;
 
-        sendMessage(email.toString());
+        sendMessage(email.toString(), true);
 
         // Send \r\n.\r\n to end the mail data
         sendMessage(".");
@@ -415,6 +423,8 @@ bool SmtpClient::sendMail(MimeMessage& email)
     {
         return false;
     }
+
+    emit smtpInfo(SmtpInfo::Sent);
 
     return true;
 }
@@ -465,13 +475,36 @@ void SmtpClient::waitForResponse()
     } while (true);
 }
 
-void SmtpClient::sendMessage(const QString &text)
+void SmtpClient::sendMessage(const QString &text, bool reportProgress)
 {
-    socket->write(text.toUtf8() + "\r\n");
-    if (! socket->waitForBytesWritten(sendMessageTimeout))
-    {
-      emit smtpError(SendDataTimeoutError);
-      throw SendMessageTimeoutException();
+    QByteArray data(text.toUtf8() + "\r\n");
+
+    int size = data.size();
+    int pos = 0;
+    int len = ((size - pos) > 8192) ? 8192 : (size - pos);
+
+    while(len > 0) {
+        QByteArray bt = data.mid(pos, len);
+        if (reportProgress) {
+            qreal perc = (((qreal) pos) / ((qreal) size)) * 100.0;
+            emit smtpSendProgress(perc);
+        }
+
+        socket->write(bt);
+        if (! socket->waitForBytesWritten(sendMessageTimeout)) {
+            emit smtpError(SendDataTimeoutError);
+            throw SendMessageTimeoutException();
+        }
+
+        pos += bt.size();
+        len = ((size - pos) > 8192) ? 8192 : (size - pos);
+        if (len > 0) {
+            bt = data.mid(pos, len);
+        }
+    }
+
+    if (reportProgress) {
+        emit smtpSendProgress(100.0);
     }
 }
 
