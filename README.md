@@ -1,4 +1,4 @@
-SMTP Client for Qt (C++) - Version 2.0 Beta [![Build Status](https://travis-ci.org/bluetiger9/SmtpClient-for-Qt.svg?branch=dev)](https://travis-ci.org/bluetiger9/SmtpClient-for-Qt)
+SMTP Client for Qt (C++) - Version 2.0 [![Build Status](https://travis-ci.org/bluetiger9/SmtpClient-for-Qt.svg?branch=dev)](https://travis-ci.org/bluetiger9/SmtpClient-for-Qt)
 =============================================
 
 The SmtpClient for Qt is small library writen for Qt 4 (C++ version) that allows application to send complex emails (plain text, html, attachments, inline files, etc.) using the Simple Mail Transfer Protocol (SMTP).
@@ -23,7 +23,7 @@ The SmtpClient for Qt is small library writen for Qt 4 (C++ version) that allows
 - output compilant with RFC2045
 
 
-## SMPT Client for Qt supports
+## SMTP Client for Qt supports
 
 - TCP and SSL connections to SMTP servers
 
