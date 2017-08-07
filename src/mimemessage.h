@@ -54,6 +54,10 @@ public:
     void setSubject(const QString & subject);
     void addPart(MimePart* part);
 
+    void createMessageID();
+    void setMessageID(const QString& messageID);
+    const QString& getMessageID();
+
     void setInReplyTo(const QString& inReplyTo);
 
     void setHeaderEncoding(MimePart::Encoding);
@@ -78,6 +82,7 @@ protected:
 
     /* [4] Protected members */
 
+    QString messageid;
     EmailAddress* sender;
     QList<EmailAddress*> recipientsTo, recipientsCc, recipientsBcc;
     QString subject;
