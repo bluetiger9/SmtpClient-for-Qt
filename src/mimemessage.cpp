@@ -21,6 +21,7 @@
 #include <QDateTime>
 #include "quotedprintable.h"
 #include <typeinfo>
+#include <QUuid>
 
 /* [1] Constructors and Destructors */
 MimeMessage::MimeMessage(bool createAutoMimeContent) :
@@ -103,6 +104,21 @@ void MimeMessage::addPart(MimePart *part)
     };
 }
 
+void MimeMessage::createMessageID()
+{
+    messageid = QString("%1@%2").arg(QUuid::createUuid().toString()).arg("QT-SMTPMAILER");
+}
+
+void MimeMessage::setMessageID(const QString &messageID)
+{
+    messageid = messageID;
+}
+
+const QString &MimeMessage::getMessageID()
+{
+    return messageid;
+}
+
 void MimeMessage::setHeaderEncoding(MimePart::Encoding hEnc)
 {
     this->hEncoding = hEnc;
@@ -174,6 +190,12 @@ QString MimeMessage::toString()
     mime += " <" + sender->getAddress() + ">\r\n";
     /* ---------------------------------- */
 
+
+    /* -------   Message id    ---------- */
+    if (!messageid.isEmpty())
+    {
+        mime += QString("Message-ID: %1\r\n").arg(messageid);
+    }
 
     /* ------- Recipients / To ---------- */    
     mime += "To:";
