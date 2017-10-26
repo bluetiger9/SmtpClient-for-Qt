@@ -25,6 +25,7 @@
 /* [1] Constructors and Destructors */
 MimeMessage::MimeMessage(bool createAutoMimeContent) :
     replyTo(Q_NULLPTR),
+    importanceType(Normal)
     hEncoding(MimePart::_8Bit)
 {
     if (createAutoMimeContent)
@@ -57,6 +58,11 @@ void MimeMessage::setContent(MimePart *content) {
       delete (this->content);
     }
     this->content = content;
+}
+
+void MimeMessage::setImportance(ImportanceType type)
+{
+    importanceType = type;
 }
 
 void MimeMessage::setReplyTo(EmailAddress* rto) {
@@ -237,6 +243,17 @@ QString MimeMessage::toString()
     if (recipientsCc.size() != 0) {
         mime += "\r\n";
     }
+    /* ---------------------------------- */
+
+    /* ----------- Importance ----------- */
+    mime += "Importance: ";
+    switch ( importanceType )
+    {
+       case High: mime += "High"; break;
+       case Normal: mime += "Normal"; break;
+       case Low: mime += "Low"; break;
+    }
+    mime += "\r\n";
     /* ---------------------------------- */
 
     /* ------------ Subject ------------- */
