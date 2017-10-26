@@ -25,7 +25,7 @@
 /* [1] Constructors and Destructors */
 MimeMessage::MimeMessage(bool createAutoMimeContent) :
     replyTo(Q_NULLPTR),
-    importanceType(Normal)
+    importanceType(Normal),
     hEncoding(MimePart::_8Bit)
 {
     if (createAutoMimeContent)
