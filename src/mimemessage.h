@@ -35,6 +35,12 @@ public:
         Cc,                 // carbon copy
         Bcc                 // blind carbon copy
     };
+    
+    enum ImportanceType {
+        High,
+        Normal,
+        Low
+    };
 
     /* [1] Constructors and Destructors */
 
@@ -52,6 +58,7 @@ public:
     void addCc(EmailAddress* rcpt);
     void addBcc(EmailAddress* rcpt);
     void setSubject(const QString & subject);
+    void setImportance(ImportanceType type);
     void addPart(MimePart* part);
     void setReplyTo(EmailAddress* rto);
 
@@ -81,6 +88,7 @@ protected:
     EmailAddress* sender;
     EmailAddress* replyTo;
     QList<EmailAddress*> recipientsTo, recipientsCc, recipientsBcc;
+    ImportanceType importanceType;
     QString subject;
     MimePart *content;
     bool autoMimeContentCreated;
