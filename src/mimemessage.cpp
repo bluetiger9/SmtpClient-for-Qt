@@ -24,7 +24,7 @@
 
 /* [1] Constructors and Destructors */
 MimeMessage::MimeMessage(bool createAutoMimeContent) :
-    replyTo(Q_NULLPTR),
+    replyTo(nullptr),
     hEncoding(MimePart::_8Bit)
 {
     if (createAutoMimeContent)
@@ -37,8 +37,8 @@ MimeMessage::~MimeMessage()
 {
     if (this->autoMimeContentCreated)
     {
-      this->autoMimeContentCreated = false;
-      delete (this->content);
+        this->autoMimeContentCreated = false;
+        delete (this->content);
     }
 }
 
@@ -53,8 +53,8 @@ MimePart& MimeMessage::getContent() {
 void MimeMessage::setContent(MimePart *content) {
     if (this->autoMimeContentCreated)
     {
-      this->autoMimeContentCreated = false;
-      delete (this->content);
+        this->autoMimeContentCreated = false;
+        delete (this->content);
     }
     this->content = content;
 }
@@ -293,7 +293,12 @@ QString MimeMessage::toString()
         mime += "In-Reply-To: <" + mInReplyTo + ">\r\n";
         mime += "References: <" + mInReplyTo + ">\r\n";
     }
+
+#if QT_MAJOR_VERSION < 5 //Qt4 workaround since RFC2822Date isn't defined
+    mime += QString("Date: %1\r\n").arg(QDateTime::currentDateTime().toString("dd MMM yyyy hh:mm:ss +/-TZ"));
+#elif //Qt5 supported
     mime += QString("Date: %1\r\n").arg(QDateTime::currentDateTime().toString(Qt::RFC2822Date));
+#endif //support RFC2822Date
 
     mime += content->toString();
     return mime;
