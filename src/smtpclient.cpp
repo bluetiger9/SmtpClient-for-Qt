@@ -43,6 +43,10 @@ SmtpClient::SmtpClient(const QString & host, int port, ConnectionType connection
             this, SLOT(socketError(QAbstractSocket::SocketError)));
     connect(socket, SIGNAL(readyRead()),
             this, SLOT(socketReadyRead()));
+
+    connect(this, SIGNAL(smtpError(SmtpError)), this, SLOT(ProcessSmtpError(SmtpError )));
+    connect(this, SIGNAL(smtpError(SmtpError, int )), this, SLOT(ProcessSmtpError(SmtpError , int )));
+    connect(this, SIGNAL(smtpError(SmtpError, int, QString)), this, SLOT(ProcessSmtpError(SmtpError , int , QString )));
 }
 
 SmtpClient::~SmtpClient() {
@@ -348,8 +352,9 @@ bool SmtpClient::login(const QString &user, const QString &password, AuthMethod 
     return true;
 }
 
-bool SmtpClient::sendMail(MimeMessage& email)
+int SmtpClient::sendMail(MimeMessage& email)
 {
+    QStringList     slVerify;
     try
     {
         // Send the MAIL command with the sender
@@ -357,7 +362,10 @@ bool SmtpClient::sendMail(MimeMessage& email)
 
         waitForResponse();
 
-        if (responseCode != 250) return false;
+        if (responseCode != 250) {
+            emit smtpError((responseCode / 100 == 4) ? ServerError : ClientError, responseCode);
+            return -1000 - responseCode; // this way, we can track the error
+        }
 
         // Send RCPT command for each recipient
         QList<EmailAddress*>::const_iterator it, itEnd;
@@ -369,34 +377,109 @@ bool SmtpClient::sendMail(MimeMessage& email)
             sendMessage("RCPT TO:<" + (*it)->getAddress() + ">");
             waitForResponse();
 
-            if (responseCode != 250) return false;
+            switch(responseCode) {
+                case 250:
+                case 251:
+                    break;
+                case 550:
+                case 551:
+                case 553:
+                case 555:
+                    slVerify.clear();
+                    emit smtpError(ClientError, responseCode, (*it)->getAddress());
+                    slVerify = Verify((*it)->getAddress());
+                    if(slVerify.size() > 0) {
+                        for(int inConta = 0; inConta < slVerify.size(); inConta++) {
+                            sendMessage("RCPT TO:<" + slVerify.at(inConta).simplified() +">" );
+                            waitForResponse();
+                            if(responseCode != 250) {
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    emit smtpError(ClientError, responseCode);
+                    return -2000 - responseCode;
+            }
         }
 
         // Cc (carbon copy)
         for (it = email.getRecipients(MimeMessage::Cc).begin(), itEnd = email.getRecipients(MimeMessage::Cc).end();
              it != itEnd; ++it)
         {
-            sendMessage("RCPT TO:<" + (*it)->getAddress() + ">");
+            sendMessage("RCPT CC:<" + (*it)->getAddress() + ">");
             waitForResponse();
 
-            if (responseCode != 250) return false;
+            switch(responseCode) {
+                case 250:
+                case 251:
+                    break;
+                case 550:
+                case 551:
+                case 553:
+                case 555:
+                    slVerify.clear();
+                    emit smtpError(ClientError, responseCode, (*it)->getAddress());
+                    slVerify = Verify((*it)->getAddress());
+                    if(slVerify.size() > 0) {
+                        for(int inConta = 0; inConta < slVerify.size(); inConta++) {
+                            sendMessage("RCPT TO:<" + slVerify.at(inConta).simplified() +">" );
+                            waitForResponse();
+                            if(responseCode != 250) {
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    emit smtpError(ClientError, responseCode);
+                    return -2000 - responseCode;
+            }
         }
 
         // Bcc (blind carbon copy)
         for (it = email.getRecipients(MimeMessage::Bcc).begin(), itEnd = email.getRecipients(MimeMessage::Bcc).end();
              it != itEnd; ++it)
         {
-            sendMessage("RCPT TO:<" + (*it)->getAddress() + ">");
+            sendMessage("RCPT BCC:<" + (*it)->getAddress() + ">"); // If you use TO:<>, the address will be visible to receivers
             waitForResponse();
 
-            if (responseCode != 250) return false;
+            switch(responseCode) {
+                case 250:
+                case 251:
+                    break;
+                case 550:
+                case 551:
+                case 553:
+                case 555:
+                    slVerify.clear();
+                    emit smtpError(ClientError, responseCode, (*it)->getAddress());
+                    slVerify = Verify((*it)->getAddress());
+                    if(slVerify.size() > 0) {
+                        for(int inConta = 0; inConta < slVerify.size(); inConta++) {
+                            sendMessage("RCPT BCC:" + slVerify.at(inConta).simplified() );
+                            waitForResponse();
+                            if(responseCode != 250) {
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    emit smtpError(ClientError, responseCode);
+                    return -2000 - responseCode;
+            }
         }
 
         // Send DATA command
         sendMessage("DATA");
         waitForResponse();
 
-        if (responseCode != 354) return false;
+        if (responseCode != 354) { // && responseCode !=  250) { // To avoid delay in response / wrong order responseCode - Comment if you like
+            emit smtpError(((responseCode / 100) == 4) ? ServerError : ClientError, responseCode);
+            return -5000 - responseCode;
+        }
 
         sendMessage(email.toString());
 
@@ -405,15 +488,18 @@ bool SmtpClient::sendMail(MimeMessage& email)
 
         waitForResponse();
 
-        if (responseCode != 250) return false;
+        if (responseCode != 250) {
+            emit smtpError(((responseCode / 100) == 4) ? ServerError : ClientError, responseCode);
+            return -6000 - responseCode;
+        }
     }
     catch (ResponseTimeoutException)
     {
-        return false;
+        return -7000;
     }
     catch (SendMessageTimeoutException)
     {
-        return false;
+        return -8000;
     }
 
     return true;
@@ -431,6 +517,38 @@ void SmtpClient::quit()
         if(socket->state() == QAbstractSocket::ConnectedState || socket->state() == QAbstractSocket::ConnectingState || socket->state() == QAbstractSocket::HostLookupState)
             socket->disconnectFromHost();
     }
+}
+
+// If receives an error when sending RCPT, CC or BCC, try to verify addresses
+QStringList SmtpClient::Verify(QString szMailBox)
+{
+    QString         szResponse;
+    QStringList     slRetorno;
+
+    sendMessage("VRFY " + szMailBox );
+    waitForResponse();
+    switch(responseCode) {
+        case 250:
+        case 251:
+        case 252:
+            szResponse = responseText;
+            szResponse.replace("250-", "");
+            szResponse.replace("250 ", "");
+            szResponse.replace("\r\n", "|");
+            slRetorno = szResponse.split("|");
+            emit UpdateEMail(szMailBox, szResponse);
+            qDebug() << szResponse;
+            break;
+        case  502:
+        case  504:
+        case  550:
+        case  551:
+        case  553:
+            //qDebug() << QString("Response Text (VRFY %1): %2").arg( responseCode).arg(responseText.toStdString().c_str());
+            emit smtpError(VerifyError, responseCode, szMailBox);
+            break;
+    }
+    return slRetorno;
 }
 
 /* [3] --- */
