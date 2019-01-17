@@ -45,7 +45,9 @@ public:
         SendDataTimeoutError,
         AuthenticationFailedError,
         ServerError,    // 4xx smtp error
-        ClientError     // 5xx smtp error
+        ClientError,    // 5xx smtp error
+        UserError,
+        VerifyError     // For monitoring VRFY command
     };
 
     enum ConnectionType
@@ -115,10 +117,11 @@ public:
     bool login();
     bool login(const QString &user, const QString &password, AuthMethod method = AuthLogin);
 
-    bool sendMail(MimeMessage& email);
+    int sendMail(MimeMessage& email);
 
     void quit();
 
+    QStringList Verify(QString szMailBox);
 
     /* [3] --- */
 
@@ -175,7 +178,10 @@ signals:
 
     /* [7] Signals */
 
-    void smtpError(SmtpClient::SmtpError e);
+    void smtpError(SmtpClient::SmtpError );
+    void smtpError(SmtpClient::SmtpError, int );
+    void smtpError(SmtpClient::SmtpError, int, QString );
+    void UpdateEMail(QString, QString);
 
     /* [7] --- */
 
