@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core network
+QT       -= gui
 
 TARGET = SMTPEmail
 
