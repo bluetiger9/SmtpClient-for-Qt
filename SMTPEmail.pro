@@ -28,7 +28,7 @@ SOURCES += \
     src/smtpclient.cpp \
     src/quotedprintable.cpp \
     src/mimemultipart.cpp \
-    src/mimecontentformatter.cpp \
+    src/mimecontentformatter.cpp
 
 HEADERS  += \
     src/emailaddress.h \

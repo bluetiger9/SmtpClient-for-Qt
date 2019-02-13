@@ -365,7 +365,8 @@ bool SmtpClient::sendMail(MimeMessage& email)
         for (it = email.getRecipients().begin(), itEnd = email.getRecipients().end();
              it != itEnd; ++it)
         {
-            sendMessage("RCPT TO: <" + (*it)->getAddress() + ">");
+
+            sendMessage("RCPT TO:<" + (*it)->getAddress() + ">");
             waitForResponse();
 
             if (responseCode != 250) return false;
@@ -375,7 +376,7 @@ bool SmtpClient::sendMail(MimeMessage& email)
         for (it = email.getRecipients(MimeMessage::Cc).begin(), itEnd = email.getRecipients(MimeMessage::Cc).end();
              it != itEnd; ++it)
         {
-            sendMessage("RCPT TO: <" + (*it)->getAddress() + ">");
+            sendMessage("RCPT TO:<" + (*it)->getAddress() + ">");
             waitForResponse();
 
             if (responseCode != 250) return false;
@@ -420,7 +421,16 @@ bool SmtpClient::sendMail(MimeMessage& email)
 
 void SmtpClient::quit()
 {
-    sendMessage("QUIT");
+    try 
+    {
+        sendMessage("QUIT");
+    }
+    catch(SmtpClient::SendMessageTimeoutException) 
+    {
+	//Manually close the connection to the smtp server if message "QUIT" wasn't received by the smtp server
+        if(socket->state() == QAbstractSocket::ConnectedState || socket->state() == QAbstractSocket::ConnectingState || socket->state() == QAbstractSocket::HostLookupState)
+            socket->disconnectFromHost();
+    }
 }
 
 /* [3] --- */
