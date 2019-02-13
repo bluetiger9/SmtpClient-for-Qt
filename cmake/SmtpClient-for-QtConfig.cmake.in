@@ -1,0 +1,30 @@
+# Config file for the QtSolutions package
+# This adds QtSolutions IMPORTED target
+#
+# Usage example:
+# 
+#   find_package(QtSolutions)
+#   add_executable(foo foo.cpp)
+#   target_link_libraries(foo QtSolutions)
+#
+# Additionaly you can use the following varaibles:
+#
+#  QtRangeSlider_FOUND   	    - standard CMake Package found indicator
+#  QtRangeSlider_INCLUDE_DIR  - include directories for QtRangeSlider alone
+#  QtRangeSlider_INCLUDE_DIRS - include directories for QtRangeSlider with all dpendencies
+#  QtRangeSlider_DEFINITIONS  - Definitions needed to build with QtRangeSlider
+#  QtRangeSlider_LIBRARIES    - Libraries needed to build with QtRangeSlider
+
+
+include(CMakeFindDependencyMacro)
+find_dependency(Qt5Widgets)
+
+# Our library dependencies (contains definitions for IMPORTED targets)
+if(NOT TARGET QtSolutions)
+  include("${CMAKE_CURRENT_LIST_DIR}/QtSolutionsTargets.cmake")
+endif()
+
+# @PACKAGE_INIT@
+
+# check_required_components(QtSolutions)
+
