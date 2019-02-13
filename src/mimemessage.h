@@ -59,6 +59,7 @@ public:
     void setImportance(ImportanceType type);
     void addBcc(EmailAddress* rcpt);
     void setSubject(const QString & subject);
+    void setImportance(ImportanceType type);
     void addPart(MimePart* part);
     void setReplyTo(EmailAddress* rto);
 
