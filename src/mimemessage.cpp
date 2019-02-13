@@ -26,7 +26,6 @@
 MimeMessage::MimeMessage(bool createAutoMimeContent) :
     importanceType(Normal),
     replyTo(Q_NULLPTR),
-    importanceType(Normal),
     hEncoding(MimePart::_8Bit)
 {
     if (createAutoMimeContent)
