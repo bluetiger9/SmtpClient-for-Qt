@@ -340,7 +340,7 @@ bool SmtpClient::login(const QString &user, const QString &password, AuthMethod 
     }
     catch (SendMessageTimeoutException)
     {
-	// Send Timeout exceeded
+    // Send Timeout exceeded
         emit smtpError(AuthenticationFailedError);
         return false;
     }
@@ -353,7 +353,7 @@ bool SmtpClient::sendMail(MimeMessage& email)
     try
     {
         // Send the MAIL command with the sender
-        sendMessage("MAIL FROM:<" + email.getSender().getAddress() + ">");
+        sendMessage("MAIL FROM: <" + email.getSender().getAddress() + ">");
 
         waitForResponse();
 
@@ -368,7 +368,7 @@ bool SmtpClient::sendMail(MimeMessage& email)
 
             sendMessage("RCPT TO:<" + (*it)->getAddress() + ">");
             waitForResponse();
-
+QString lAddress("RCPT TO:<" + (*it)->getAddress() + ">");
             if (responseCode != 250) return false;
         }
 
@@ -386,7 +386,7 @@ bool SmtpClient::sendMail(MimeMessage& email)
         for (it = email.getRecipients(MimeMessage::Bcc).begin(), itEnd = email.getRecipients(MimeMessage::Bcc).end();
              it != itEnd; ++it)
         {
-            sendMessage("RCPT TO:<" + (*it)->getAddress() + ">");
+            sendMessage("RCPT TO: <" + (*it)->getAddress() + ">");
             waitForResponse();
 
             if (responseCode != 250) return false;
@@ -421,13 +421,13 @@ bool SmtpClient::sendMail(MimeMessage& email)
 
 void SmtpClient::quit()
 {
-    try 
+    try
     {
         sendMessage("QUIT");
     }
-    catch(SmtpClient::SendMessageTimeoutException) 
+    catch(SmtpClient::SendMessageTimeoutException)
     {
-	//Manually close the connection to the smtp server if message "QUIT" wasn't received by the smtp server
+    //Manually close the connection to the smtp server if message "QUIT" wasn't received by the smtp server
         if(socket->state() == QAbstractSocket::ConnectedState || socket->state() == QAbstractSocket::ConnectingState || socket->state() == QAbstractSocket::HostLookupState)
             socket->disconnectFromHost();
     }

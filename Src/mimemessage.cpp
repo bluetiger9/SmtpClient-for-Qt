@@ -184,6 +184,8 @@ QString MimeMessage::toString()
         case MimePart::QuotedPrintable:
             mime += " =?utf-8?Q?" + QuotedPrintable::encode(QByteArray().append(sender->getName())).replace(' ', "_").replace(':',"=3A") + "?=";
             break;
+        case MimePart::_7Bit:
+        case MimePart::_8Bit:
         default:
             mime += " " + sender->getName();
         }
@@ -209,6 +211,8 @@ QString MimeMessage::toString()
             case MimePart::QuotedPrintable:
                 mime += " =?utf-8?Q?" + QuotedPrintable::encode(QByteArray().append((*it)->getName())).replace(' ', "_").replace(':',"=3A") + "?=";
                 break;
+            case MimePart::_7Bit:
+            case MimePart::_8Bit:
             default:
                 mime += " " + (*it)->getName();
             }
@@ -236,6 +240,8 @@ QString MimeMessage::toString()
             case MimePart::QuotedPrintable:
                 mime += " =?utf-8?Q?" + QuotedPrintable::encode(QByteArray().append((*it)->getName())).replace(' ', "_").replace(':',"=3A") + "?=";
                 break;
+            case MimePart::_7Bit:
+            case MimePart::_8Bit:
             default:
                 mime += " " + (*it)->getName();
             }
@@ -259,6 +265,8 @@ QString MimeMessage::toString()
     case MimePart::QuotedPrintable:
         mime += "=?utf-8?Q?" + QuotedPrintable::encode(QByteArray().append(subject)).replace(' ', "_").replace(':',"=3A") + "?=";
         break;
+    case MimePart::_7Bit:
+    case MimePart::_8Bit:
     default:
         mime += subject;
     }
@@ -278,6 +286,8 @@ QString MimeMessage::toString()
             case MimePart::QuotedPrintable:
                 mime += " =?utf-8?Q?" + QuotedPrintable::encode(QByteArray().append(replyTo->getName())).replace(' ', "_").replace(':',"=3A") + "?=";
                 break;
+            case MimePart::_7Bit:
+            case MimePart::_8Bit:
             default:
                 mime += " " + replyTo->getName();
             }

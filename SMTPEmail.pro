@@ -3,51 +3,59 @@
 # Project created by QtCreator 2011-08-11T20:59:25
 #
 #-------------------------------------------------
-
-QT       += core network
-
 TARGET = SMTPEmail
-
-# Build as an application
-#TEMPLATE = app
-
-# Build as a library
 TEMPLATE = lib
+
+QT -= gui
+QT += core network
 DEFINES += SMTP_BUILD
-win32:CONFIG += dll
+
+CONFIG(debug, debug|release) {
+    win32:      TARGET = $$join(TARGET,,,D)
+    mac:        TARGET = $$join(TARGET,,,_debug)
+    unix:!mac:  TARGET = $$join(TARGET,,,.debug)
+}
 
 SOURCES += \
-    src/emailaddress.cpp \
-    src/mimeattachment.cpp \
-    src/mimefile.cpp \
-    src/mimehtml.cpp \
-    src/mimeinlinefile.cpp \
-    src/mimemessage.cpp \
-    src/mimepart.cpp \
-    src/mimetext.cpp \
-    src/smtpclient.cpp \
-    src/quotedprintable.cpp \
-    src/mimemultipart.cpp \
-    src/mimecontentformatter.cpp \
+    Src/emailaddress.cpp \
+    Src/mimeattachment.cpp \
+    Src/mimefile.cpp \
+    Src/mimehtml.cpp \
+    Src/mimeinlinefile.cpp \
+    Src/mimemessage.cpp \
+    Src/mimepart.cpp \
+    Src/mimetext.cpp \
+    Src/smtpclient.cpp \
+    Src/quotedprintable.cpp \
+    Src/mimemultipart.cpp \
+    Src/mimecontentformatter.cpp \
 
 HEADERS  += \
-    src/emailaddress.h \
-    src/mimeattachment.h \
-    src/mimefile.h \
-    src/mimehtml.h \
-    src/mimeinlinefile.h \
-    src/mimemessage.h \
-    src/mimepart.h \
-    src/mimetext.h \
-    src/smtpclient.h \
-    src/SmtpMime \
-    src/quotedprintable.h \
-    src/mimemultipart.h \
-    src/mimecontentformatter.h \
-    src/smtpexports.h
+    Include/SMTPEmail/emailaddress.h \
+    Include/SMTPEmail/mimeattachment.h \
+    Include/SMTPEmail/mimefile.h \
+    Include/SMTPEmail/mimehtml.h \
+    Include/SMTPEmail/mimeinlinefile.h \
+    Include/SMTPEmail/mimemessage.h \
+    Include/SMTPEmail/mimepart.h \
+    Include/SMTPEmail/mimetext.h \
+    Include/SMTPEmail/smtpclient.h \
+    Include/SMTPEmail/SmtpMime \
+    Include/SMTPEmail/quotedprintable.h \
+    Include/SMTPEmail/mimemultipart.h \
+    Include/SMTPEmail/mimecontentformatter.h \
+    Include/SMTPEmail/smtpexports.h
 
 OTHER_FILES += \
     LICENSE \
     README.md
 
-FORMS +=
+
+INCLUDEPATH += Include/SMTPEmail
+
+unix {
+    target.path = /usr/local/lib
+    copy_lib_headers.path = /usr/local/include/SMTPEmail/
+    copy_lib_headers.files = $$PWD/Include/SMTPEmail/*.h
+    INSTALLS += target copy_lib_headers
+}
