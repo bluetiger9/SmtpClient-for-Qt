@@ -19,6 +19,7 @@
 #include "mimemessage.h"
 
 #include <QDateTime>
+#include <QLocale>
 #include "quotedprintable.h"
 #include <typeinfo>
 
@@ -294,10 +295,17 @@ QString MimeMessage::toString()
         mime += "References: <" + mInReplyTo + ">\r\n";
     }
 
+QDateTime now = QDateTime::currentDateTime();
 #if QT_VERSION_MAJOR < 5 //Qt4 workaround since RFC2822Date isn't defined
-    mime += QString("Date: %1\r\n").arg(QDateTime::currentDateTime().toString("dd MMM yyyy hh:mm:ss +/-TZ"));
+    QString shortDayName = QLocale::c().dayName(now.date().dayOfWeek(), QLocale::ShortFormat);
+    QString shortMonthName = QLocale::c().monthName(now.date().month(), QLocale::ShortFormat);
+    int utcOffset = now.secsTo(QDateTime(now.date(), now.time(), Qt::UTC)) / 60;
+    char timezoneSign = utcOffset >= 0 ? '+' : '-';
+    utcOffset = utcOffset >= 0 ? utcOffset : -utcOffset;
+    QString timezone = QString("%1%2%3").arg(timezoneSign).arg(utcOffset / 60, 2, 10, QChar('0')).arg(utcOffset % 60, 2, 10, QChar('0'));
+    mime += QString("Date: %1\r\n").arg(now.toString("%1, dd %2 yyyy hh:mm:ss %3").arg(shortDayName).arg(shortMonthName).arg(timezone));
 #else //Qt5 supported
-    mime += QString("Date: %1\r\n").arg(QDateTime::currentDateTime().toString(Qt::RFC2822Date));
+    mime += QString("Date: %1\r\n").arg(now.toString(Qt::RFC2822Date));
 #endif //support RFC2822Date
 
     mime += content->toString();
