@@ -7,6 +7,7 @@
 CONFIG	+= c++11
 
 QT       += core network
+QT       -= gui
 
 TARGET = SMTPEmail
 
