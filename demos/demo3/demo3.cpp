@@ -39,7 +39,8 @@ int main(int argc, char *argv[])
     message.addPart(&text);
 
     // Now we create the attachment object
-    MimeAttachment attachment (new QFile("image1.jpg"));
+    QFile imageFile("image1.jpg");
+    MimeAttachment attachment(&imageFile);
 
     // the file type can be setted. (by default is application/octet-stream)
     attachment.setContentType("image/jpg");
@@ -48,8 +49,9 @@ int main(int argc, char *argv[])
     message.addPart(&attachment);
 
     // Add an another attachment
-    MimeAttachment document(new QFile("document.pdf"));
-    message.addPart(&document);
+    QFile document("document.pdf");
+    MimeAttachment documentAttachment(&document);
+    message.addPart(&documentAttachment);
 
     // Now we can send the mail
     SmtpClient smtp("smtp.gmail.com", 465, SmtpClient::SslConnection);

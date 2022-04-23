@@ -45,13 +45,16 @@ int main(int argc, char *argv[])
 
 
     // Create a MimeInlineFile object for each image
-    MimeInlineFile image1 (new QFile("image1.jpg"));
+    QFile imageFile1("image1.jpg");
+    MimeInlineFile image1(&imageFile1);
 
     // An unique content id must be setted
     image1.setContentId("image1");
     image1.setContentType("image/jpg");
 
-    MimeInlineFile image2 (new QFile("image2.jpg"));
+    QFile imageFile2("image2.jpg");
+    MimeInlineFile image2(&imageFile2);
+
     image2.setContentId("image2");
     image2.setContentType("image/jpg");
 

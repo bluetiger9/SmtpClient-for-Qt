@@ -96,7 +96,9 @@ void SendEmail::on_sendEmail_clicked()
 
     for (int i = 0; i < ui->attachments->count(); ++i)
     {
-        message.addPart(new MimeAttachment(new QFile(ui->attachments->item(i)->text())));
+        QFile file(ui->attachments->item(i)->text());
+        MimeAttachment attachment(&file);
+        message.addPart(&attachment);
     }
 
     smtp.connectToHost();
