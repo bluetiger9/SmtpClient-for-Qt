@@ -447,6 +447,11 @@ void SmtpClient::waitForResponse()
             throw ResponseTimeoutException();
         }
 
+        if (!socket->isOpen()) {
+            emit smtpError(ResponseTimeoutError);
+            throw ResponseTimeoutException();
+        }
+
         while (socket->canReadLine()) {
             // Save the server's response
             responseText = socket->readLine();
