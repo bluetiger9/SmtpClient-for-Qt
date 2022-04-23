@@ -609,6 +609,11 @@ void SmtpClient::socketReadyRead()
 {
     QString responseLine;
 
+    if (!socket->isOpen()) {
+        emitError(SocketError);
+        return;
+    }
+
     while (socket->canReadLine()) {
         // Save the server's response
         responseLine = socket->readLine();

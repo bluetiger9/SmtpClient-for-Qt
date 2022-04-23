@@ -4,7 +4,14 @@
 #
 #-------------------------------------------------
 
+CONFIG	+= c++11
+
 QT = core network
+
+VERSION = 2.0.0
+VER_MAJ = 2
+VER_MIN = 0
+VER_PAT = 0
 
 TARGET = SmtpMime
 TEMPLATE = lib

@@ -1,7 +1,7 @@
 SMTP Client for Qt (C++) - Version 2.0 [![Build Status](https://travis-ci.org/bluetiger9/SmtpClient-for-Qt.svg?branch=dev)](https://travis-ci.org/bluetiger9/SmtpClient-for-Qt)
 =============================================
 
-The SmtpClient for Qt is small library writen for Qt 4 (C++ version) that allows application to send complex emails (plain text, html, attachments, inline files, etc.) using the Simple Mail Transfer Protocol (SMTP).
+The SmtpClient for Qt is small library writen for Qt 5 (C++ version) that allows application to send complex emails (plain text, html, attachments, inline files, etc.) using the Simple Mail Transfer Protocol (SMTP).
 
 ## New in version 2.0:
 - Asynchronous & Synchronous working mode
@@ -44,32 +44,26 @@ The SmtpClient for Qt is small library writen for Qt 4 (C++ version) that allows
 Lets see a simple example:
 
 ```c++
-#include <QtGui/QApplication>
+#include <QtCore>
 #include "../src/SmtpMime"
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+{
+    QCoreApplication a(argc, argv);
 
     // This is a first demo application of the SmtpClient for Qt project
 
-    // First we need to create an SmtpClient object
-    // We will use the Gmail's smtp server (smtp.gmail.com, port 465, ssl)
-
-    SmtpClient smtp("smtp.gmail.com", 465, SmtpClient::SslConnection);
-
-    // We need to set the username (your email address) and the password
-    // for smtp authentification.
-
-    smtp.setUser("your_email_address@gmail.com");
-    smtp.setPassword("your_password");
-
-    // Now we create a MimeMessage object. This will be the email.
+    // Now we create a MimeMessage object. This is the email.
 
     MimeMessage message;
 
-    message.setSender(new EmailAddress("your_email_address@gmail.com", "Your Name"));
-    message.addRecipient(new EmailAddress("recipient@host.com", "Recipient's Name"));
+    EmailAddress sender("your_email_address@host.com", "Your Name");
+    message.setSender(sender);
+
+    EmailAddress to("recipient@host.com", "Recipient's Name");
+    message.addRecipient(to);
+
     message.setSubject("SmtpClient for Qt - Demo");
 
     // Now add some text to the email.
@@ -84,15 +78,25 @@ int main(int argc, char *argv[])
     message.addPart(&text);
 
     // Now we can send the mail
+    SmtpClient smtp("smtp.gmail.com", 465, SmtpClient::SslConnection);
 
     smtp.connectToHost();
-    smtp.waitForReadyConnected();
+    if (!smtp.waitForReadyConnected()) {
+        qDebug() << "Failed to connect to host!" << endl;
+        return -1;
+    }
 
-    smtp.login();
-    smtp.waitForAuthenticated();
+    smtp.login("your_email_address@host.com", "your_password");
+    if (!smtp.waitForAuthenticated()) {
+        qDebug() << "Failed to login!" << endl;
+        return -2;
+    }
 
     smtp.sendMail(message);
-    smtp.waitForMailSent();
+    if (!smtp.waitForMailSent()) {
+        qDebug() << "Failed to send mail!" << endl;
+        return -3;
+    }
 
     smtp.quit();
 
@@ -106,4 +110,4 @@ For more examples see the [Wiki/Examples](https://github.com/bluetiger9/SmtpClie
 This project (all files including the demos/examples) is licensed under the GNU LGPL, version 2.1.
 
 
-**Copyright (c) 2014 - Tőkés Attila**
+**Copyright (c) 2014-2022 - Attila Tőkés**

@@ -135,9 +135,6 @@ public:
     void quit();
     void reset();
 
-    bool isConnected();
-    bool isLogged();
-
     bool waitForReadyConnected(int msec = 30000);
     bool waitForAuthenticated(int msec = 30000);
     bool waitForMailSent(int msec = 30000);
