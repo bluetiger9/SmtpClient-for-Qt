@@ -105,6 +105,11 @@ void MimeMessage::setSubject(const QString & subject)
     this->subject = subject;
 }
 
+void MimeMessage::addCustomHeader(const QString & header)
+{
+    this->customHeaders << header;
+}
+
 void MimeMessage::addPart(MimePart *part)
 {
     if (typeid(*content) == typeid(MimeMultiPart)) {
@@ -284,6 +289,12 @@ QString MimeMessage::toString()
             }
         }
         mime += " <" + replyTo->getAddress() + ">\r\n";
+    }
+
+    /* -------- Custom Headers -------- */
+    foreach (QString hdr, customHeaders) {
+        mime += hdr.toLocal8Bit();
+        mime += "\r\n";
     }
 
     /* ---------------------------------- */

@@ -54,6 +54,7 @@ public:
     void setSubject(const QString & subject);
     void addPart(MimePart* part);
     void setReplyTo(EmailAddress* rto);
+    void addCustomHeader(const QString & header);
 
     void setInReplyTo(const QString& inReplyTo);
 
@@ -85,6 +86,7 @@ protected:
     QList<EmailAddress*> recipientsTo, recipientsCc, recipientsBcc;
     QString subject;
     QString mInReplyTo;
+    QStringList customHeaders;
     MimePart *content;
     bool autoMimeContentCreated;
 
