@@ -51,7 +51,19 @@ const QString & MimeText::getText() const
 /* [3] Protected Methods */
 
 void MimeText::writeContent(QIODevice &device) const {
-    MimePart::writeContent(device, text.toLocal8Bit());
+    switch (cEncoding)
+    {
+    case _7Bit:
+    case _8Bit:
+        MimePart::writeContent(device, text.toLocal8Bit());
+        break;
+    case Base64:
+        MimePart::writeContent(device, text.toUtf8());
+        break;
+    case QuotedPrintable:
+        MimePart::writeContent(device, text.toLatin1());
+        break;
+    }
 }
 
 /* [3] --- */
