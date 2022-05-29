@@ -156,7 +156,7 @@ QString MimeMessage::toString() const
 QByteArray MimeMessage::formatAddress(const EmailAddress &address, MimePart::Encoding encoding) {
     QByteArray result;
     result.append(format(address.getName(), encoding));
-    result.append(" <" + address.getAddress() + ">");
+    result.append((" <" + address.getAddress() + ">").toUtf8());
     return result;
 }
 

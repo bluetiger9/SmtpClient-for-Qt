@@ -328,8 +328,8 @@ void SmtpClient::changeState(SmtpClient::ClientState state) {
     /* --- AUTH --- */
     case _AUTH_PLAIN_0:
         // Sending command: AUTH PLAIN base64('\0' + username + '\0' + password)
-        sendMessage("AUTH PLAIN " + QByteArray().append((char) 0).append(authInfo.username)
-                    .append((char) 0).append(authInfo.password).toBase64());
+        sendMessage("AUTH PLAIN " + QByteArray().append((char) 0).append(authInfo.username.toUtf8())
+                    .append((char) 0).append(authInfo.password.toUtf8()).toBase64());
         break;
 
     case _AUTH_LOGIN_0:
@@ -338,12 +338,12 @@ void SmtpClient::changeState(SmtpClient::ClientState state) {
 
     case _AUTH_LOGIN_1_USER:
         // Send the username in base64
-        sendMessage(QByteArray().append(authInfo.username).toBase64());
+        sendMessage(QByteArray().append(authInfo.username.toUtf8()).toBase64());
         break;
 
     case _AUTH_LOGIN_2_PASS:
         // Send the password in base64
-        sendMessage(QByteArray().append(authInfo.password).toBase64());
+        sendMessage(QByteArray().append(authInfo.password.toUtf8()).toBase64());
         break;
 
     case _READY_Authenticated:

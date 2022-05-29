@@ -179,8 +179,9 @@ void MimePart::writeToDevice(QIODevice &device) const {
     /* ------------------------ */
 
     /* Content-Id */
-    if (cId != NULL)
+    if (!cId.isEmpty()) {
         header.append("Content-ID: <").append(cId).append(">\r\n");
+    }
     /* ---------- */
 
     /* Additional header lines */
