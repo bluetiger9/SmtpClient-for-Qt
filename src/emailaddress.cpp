@@ -25,15 +25,6 @@ EmailAddress::EmailAddress(const QString & address, const QString & name)
 {
 }
 
-EmailAddress::EmailAddress(const EmailAddress &other)
-    : address(other.address), name(other.name)
-{
-}
-
-EmailAddress::~EmailAddress()
-{
-}
-
 /* [1] --- */
 
 

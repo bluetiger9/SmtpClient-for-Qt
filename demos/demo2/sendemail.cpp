@@ -23,6 +23,8 @@
 
 #include <iostream>
 
+#include "../demo_vars.h"
+
 using namespace std;
 
 SendEmail::SendEmail(QWidget *parent) :
@@ -30,6 +32,16 @@ SendEmail::SendEmail(QWidget *parent) :
     ui(new Ui::SendEmail)
 {
     ui->setupUi(this);
+
+    ui->host->setText(SMTP_SERVER);
+    ui->port->setValue(465);
+    ui->ssl->setChecked(true);
+    ui->auth->setChecked(true);
+    ui->username->setText(SENDER_EMAIL);
+    ui->password->setText(SENDER_PASSWORD);
+
+    ui->sender->setText(QString(SENDER_NAME) + "<" + SENDER_EMAIL + ">");
+    ui->recipients->setText(QString(RECIPIENT_NAME) + "<" + RECIPIENT_EMAIL + ">");
 }
 
 SendEmail::~SendEmail()
@@ -94,11 +106,17 @@ void SendEmail::on_sendEmail_clicked()
 
     message.addPart(&content);
 
+    QList<QFile*> files;
+    QList<MimeAttachment*> attachments;
     for (int i = 0; i < ui->attachments->count(); ++i)
     {
-        QFile file(ui->attachments->item(i)->text());
-        MimeAttachment attachment(&file);
-        message.addPart(&attachment);
+        QFile* file = new QFile(ui->attachments->item(i)->text());
+        files.append(file);
+
+        MimeAttachment* attachment = new MimeAttachment(file);
+        attachments.append(attachment);
+
+        message.addPart(attachment);
     }
 
     smtp.connectToHost();
@@ -132,6 +150,14 @@ void SendEmail::on_sendEmail_clicked()
     }
 
     smtp.quit();
+
+    for (auto file : files) {
+        delete file;
+    }
+
+    for (auto attachment : attachments) {
+        delete attachment;
+    }
 
 }
 

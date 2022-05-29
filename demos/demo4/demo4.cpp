@@ -17,6 +17,7 @@
 #include <QtCore>
 
 #include "../../src/SmtpMime"
+#include "../demo_vars.h"
 
 int main(int argc, char *argv[])
 {
@@ -26,10 +27,10 @@ int main(int argc, char *argv[])
 
     MimeMessage message;
 
-    EmailAddress sender("your_email_address@host.com", "Your Name");
+    EmailAddress sender(SENDER_EMAIL, SENDER_NAME);
     message.setSender(sender);
 
-    EmailAddress to("recipient@host.com", "Recipient's Name");
+    EmailAddress to(RECIPIENT_EMAIL, RECIPIENT_NAME);
     message.addRecipient(to);
 
     message.setSubject("SmtpClient for Qt - Example 3 - Html email with images");
@@ -63,7 +64,7 @@ int main(int argc, char *argv[])
     message.addPart(&image2);
 
     // Now we can send the mail
-    SmtpClient smtp("smtp.gmail.com", 465, SmtpClient::SslConnection);
+    SmtpClient smtp(SMTP_SERVER, 465, SmtpClient::SslConnection);
 
     smtp.connectToHost();
     if (!smtp.waitForReadyConnected()) {
@@ -71,7 +72,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    smtp.login("your_email_address@host.com", "your_password");
+    smtp.login(SENDER_EMAIL, SENDER_PASSWORD);
     if (!smtp.waitForAuthenticated()) {
         qDebug() << "Failed to login!" << endl;
         return -2;
