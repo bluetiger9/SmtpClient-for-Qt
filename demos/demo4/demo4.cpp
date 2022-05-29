@@ -68,19 +68,19 @@ int main(int argc, char *argv[])
 
     smtp.connectToHost();
     if (!smtp.waitForReadyConnected()) {
-        qDebug() << "Failed to connect to host!" << endl;
+        qDebug() << "Failed to connect to host!";
         return -1;
     }
 
     smtp.login(SENDER_EMAIL, SENDER_PASSWORD);
     if (!smtp.waitForAuthenticated()) {
-        qDebug() << "Failed to login!" << endl;
+        qDebug() << "Failed to login!";
         return -2;
     }
 
     smtp.sendMail(message);
     if (!smtp.waitForMailSent()) {
-        qDebug() << "Failed to send mail!" << endl;
+        qDebug() << "Failed to send mail!";
         return -3;
     }
     smtp.quit();
