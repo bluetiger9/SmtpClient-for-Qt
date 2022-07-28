@@ -20,8 +20,8 @@ SOURCES += \
 # Location of SMTP Library
 SMTP_LIBRARY_LOCATION = $$PWD/../../../build/SMTPEmail-Desktop-Debug
 
-win32:CONFIG(release, debug|release): LIBS += -L$$SMTP_LIBRARY_LOCATION/release/ -lSMTPMime
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$SMTP_LIBRARY_LOCATION/debug/ -lSMTPMime
+win32:CONFIG(release, debug|release): LIBS += -L$$SMTP_LIBRARY_LOCATION/release/ -lSMTPMime2
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$SMTP_LIBRARY_LOCATION/debug/ -lSMTPMime2
 else:unix: LIBS += -L$$SMTP_LIBRARY_LOCATION -lSmtpMime
 
 INCLUDEPATH += $$SMTP_LIBRARY_LOCATION
