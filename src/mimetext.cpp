@@ -18,7 +18,11 @@
 
 #include "mimetext.h"
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
 #include <QStringEncoder>
+#else
+#include <QTextEncoder>
+#endif
 
 /* [1] Constructors and Destructors */
 
@@ -53,7 +57,11 @@ const QString & MimeText::getText() const
 /* [3] Protected Methods */
 
 void MimeText::writeContent(QIODevice &device) const {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     MimePart::writeContent(device, QStringEncoder(this->cCharset.toStdString().c_str()).encode(text));
+#else
+    MimePart::writeContent(device, QTextEncoder(QTextCodec::codecForName(this->cCharset.toStdString().c_str())).fromUnicode(text));
+#endif
 }
 
 /* [3] --- */
