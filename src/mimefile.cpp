@@ -18,14 +18,19 @@
 
 #include "mimefile.h"
 #include <QFileInfo>
+#include <QMimeDatabase>
+#include <QMimeType>
 
 /* [1] Constructors and Destructors */
 
 MimeFile::MimeFile(QFile *file)
 {
+    QFileInfo fileInfo(*file);
+    QMimeType mimeType = QMimeDatabase().mimeTypeForFile(fileInfo);
+
     this->file = file;
-    this->cType = "application/octet-stream";
-    this->cName = QFileInfo(*file).fileName();
+    this->cType = mimeType.name();
+    this->cName = fileInfo.fileName();
     this->cEncoding = Base64;
 }
 
