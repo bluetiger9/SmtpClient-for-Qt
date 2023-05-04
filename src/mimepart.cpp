@@ -192,7 +192,7 @@ void MimePart::writeToDevice(QIODevice &device) const {
 
     /* === End of Header Prepare === */
 
-    device.write(header.toLatin1());
+    device.write(header.toUtf8());
 
     writeContent(device);
 }
