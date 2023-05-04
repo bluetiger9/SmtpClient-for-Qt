@@ -24,7 +24,7 @@
 MimeAttachment::MimeAttachment(QFile *file)
     : MimeFile(file)
 {
-    this->headerLines += "Content-disposition: attachment\r\n";
+    this->headerLines += "Content-disposition: attachment; filename=\"" + cName + "\"\r\n";
 }
 
 MimeAttachment::~MimeAttachment()
