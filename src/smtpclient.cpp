@@ -545,8 +545,8 @@ void SmtpClient::sendMessage(const QString &text)
     qDebug() << "[Socket] OUT:" << text;
 #endif
 
-    socket->flush();
     socket->write(text.toUtf8() + "\r\n");
+    socket->flush();
 }
 
 void SmtpClient::emitError(SmtpClient::SmtpError e)
