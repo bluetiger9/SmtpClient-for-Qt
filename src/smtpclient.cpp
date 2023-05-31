@@ -560,9 +560,9 @@ void SmtpClient::waitForEvent(int msec, const char *successSignal)
     QObject::connect(this, successSignal, &loop, SLOT(quit()));
     QObject::connect(this, SIGNAL(error(SmtpClient::SmtpError)), &loop, SLOT(quit()));
 
+    QTimer timer;
     if(msec > 0)
     {
-        QTimer timer;
         timer.setSingleShot(true);
         connect(&timer, SIGNAL(timeout()), &loop, SLOT(quit()));
         timer.start(msec);
