@@ -158,7 +158,7 @@ void SmtpClient::sendMail(const MimeMessage & email)
 
 void SmtpClient::quit()
 {
-    changeState(DisconnectingState);
+    changeState(_QUITTING_State);
 }
 
 void SmtpClient::reset()
@@ -218,6 +218,17 @@ bool SmtpClient::waitForReset(int msec)
     waitForEvent(msec, SIGNAL(mailReset()));
 
     return isReset;
+}
+
+bool SmtpClient::waitForDisconnected(int msec)
+{
+
+    if (!isReadyConnected)
+        return false;
+
+    waitForEvent(msec, SIGNAL(disconnected()));
+
+    return !isReadyConnected;
 }
 
 /* [3] --- */
@@ -282,9 +293,22 @@ void SmtpClient::changeState(SmtpClient::ClientState state) {
         changeState(_MAIL_0_FROM);
         break;
 
-    case DisconnectingState:
+    case _QUITTING_State:
         sendMessage("QUIT");
+        break;
+
+    case DisconnectingState:
+
+        // Server should disconnect after sending reply to QUIT command, but disconnecting here takes care of a non-compliantserver.
         socket->disconnectFromHost();
+        isReadyConnected = false;
+        break;
+
+    case UnconnectedState:
+        isReadyConnected = false;
+        isAuthenticated = false;
+
+        emit disconnected();
         break;
 
     case ResetState:
@@ -447,6 +471,16 @@ void SmtpClient::processResponse() {
         changeState((connectionType != TlsConnection) ? _READY_Connected : _TLS_State);
         break;
 
+    case _QUITTING_State:
+        // The response code needs to be 221.
+        if (responseCode != 221) {
+            emitError(ClientError);
+            return;
+        }
+        changeState(DisconnectingState);
+
+        break;
+
     /* --- TLS --- */
     case _TLS_0_STARTTLS:
         // The response code needs to be 220.
@@ -545,8 +579,8 @@ void SmtpClient::sendMessage(const QString &text)
     qDebug() << "[Socket] OUT:" << text;
 #endif
 
-    socket->flush();
     socket->write(text.toUtf8() + "\r\n");
+    socket->flush();
 }
 
 void SmtpClient::emitError(SmtpClient::SmtpError e)
@@ -560,9 +594,9 @@ void SmtpClient::waitForEvent(int msec, const char *successSignal)
     QObject::connect(this, successSignal, &loop, SLOT(quit()));
     QObject::connect(this, SIGNAL(error(SmtpClient::SmtpError)), &loop, SLOT(quit()));
 
+    QTimer timer;
     if(msec > 0)
     {
-        QTimer timer;
         timer.setSingleShot(true);
         connect(&timer, SIGNAL(timeout()), &loop, SLOT(quit()));
         timer.start(msec);
