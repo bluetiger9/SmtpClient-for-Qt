@@ -77,6 +77,8 @@ public:
         _READY_MailSent = 54,
         _READY_Encrypted = 55,
 
+        _QUITTING_State = 56,
+
         /* Internal Substates */
 
         // TLS
@@ -139,6 +141,8 @@ public:
     bool waitForAuthenticated(int msec = 30000);
     bool waitForMailSent(int msec = 30000);
     bool waitForReset(int msec = 30000);
+
+    bool waitForDisconnected(int msec = 30000);
 
     /* [3] --- */
 
