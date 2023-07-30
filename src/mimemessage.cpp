@@ -29,12 +29,17 @@
 MimeMessage::MimeMessage(bool createAutoMimeContent) :
     hEncoding(MimePart::_8Bit)
 {
-    if (createAutoMimeContent)
+    this->mimeContentAutoCreated = createAutoMimeContent;
+    if (createAutoMimeContent) {
         this->content = new MimeMultiPart();
+    }
 }
 
 MimeMessage::~MimeMessage()
 {
+    if (this->mimeContentAutoCreated) {
+        delete this->content;
+    }
 }
 
 /* [1] --- */

@@ -86,6 +86,7 @@ protected:
     QString subject;
     QStringList customHeaders;
     MimePart *content;
+    bool mimeContentAutoCreated;
 
     MimePart::Encoding hEncoding;
 
