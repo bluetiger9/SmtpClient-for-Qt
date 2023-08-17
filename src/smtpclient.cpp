@@ -661,7 +661,7 @@ void SmtpClient::socketReadyRead()
 
 
     // Is this the last line of the response
-    if (responseLine[3] == ' ') {
+    if (responseLine.length() > 3 && responseLine[3] == ' ') {
         responseText = tempResponse;
         tempResponse = "";
 
