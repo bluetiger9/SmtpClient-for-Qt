@@ -6,7 +6,7 @@ The SmtpClient for Qt is small library written for Qt 5 / 6 (C++ version) that a
 ## New in version 2.0:
 - Asynchronous & Synchronous working mode
 
-- Qt5 compatibility
+- Qt5/6 compatibility
 
 - Building as a shared library
 
