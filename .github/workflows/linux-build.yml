@@ -1,0 +1,47 @@
+name: Linux Build
+
+on:
+  push:
+    branches:
+      - 'v2.0'
+  pull_request:
+    branches:
+    - 'v2.0'
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  SOURCE_DIR: ${{ github.workspace }}
+  QT_VERSION: '6.5.*'
+
+jobs:
+  build:
+    runs-on:  ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version:      ${{ env.QT_VERSION }}
+          host:         linux
+          target:       desktop
+          arch:         gcc_64
+          dir:          ${{ runner.temp }}
+          setup-python: false
+
+      - name: Create Build Directory
+        run:  mkdir ${{ env.SOURCE_DIR }}/build
+
+      - name: Build
+        # working-directory: ${{ env.SOURCE_DIR }}/build
+        run:  |
+              qmake -project
+              qmake src/SMTPEmail.pro
+              make
