@@ -9,6 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Network REQUIRED)
 
@@ -16,7 +17,7 @@ add_compile_options(-DSMTP_MIME_LIBRARY)
 
 message(USING Qt${QT_VERSION_MAJOR})
 
-qt_add_library(${PROJECT_NAME} SHARED
+add_library(${PROJECT_NAME} SHARED
     emailaddress.cpp
     mimeattachment.cpp
     mimebytearrayattachment.cpp
