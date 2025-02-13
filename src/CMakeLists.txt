@@ -1,6 +1,6 @@
 add_compile_options(-DSMTP_MIME_LIBRARY)
 
-qt_add_library(${LIBRARY_TARGET_NAME} SHARED
+qt_add_library(${LIBRARY_TARGET_NAME}
     emailaddress.cpp
     mimeattachment.cpp
     mimebytearrayattachment.cpp
@@ -91,3 +91,4 @@ install(TARGETS ${LIBRARY_TARGET_NAME}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/smtpmime
 )
+
