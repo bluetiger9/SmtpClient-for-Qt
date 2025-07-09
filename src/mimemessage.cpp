@@ -101,10 +101,13 @@ void MimeMessage::addCustomHeader(const QString &header)
 
 void MimeMessage::setSubject(const QString & subject)
 {
-    static QRegularExpression re("(?<!\r)\n");
     QString sanitizedSubject = subject;
-    sanitizedSubject.replace(re, "\r\n");
-    sanitizedSubject.replace(re, "\r\n");
+
+    static const QRegularExpression reNewlineWithoutCarriageReturn("(?<!\r)\n", QRegularExpression::DontCaptureOption);
+    sanitizedSubject.replace(reNewlineWithoutCarriageReturn, "\r\n");
+
+    static const QRegularExpression reCarriageReturnWithoutNewline("\r(?!\n)", QRegularExpression::DontCaptureOption);
+    sanitizedSubject.replace(reCarriageReturnWithoutNewline, "\r\n");
 
     this->subject = sanitizedSubject;
 }

@@ -47,11 +47,11 @@ void MimeText::setText(const QString & text)
 {
     QString sanitizedBody = text;
 
-    static QRegularExpression rn("(?<!\r)\n");
-    sanitizedBody.replace(rn, "\r\n");
+    static const QRegularExpression reNewlineWithoutCarriageReturn("(?<!\r)\n", QRegularExpression::DontCaptureOption);
+    sanitizedBody.replace(reNewlineWithoutCarriageReturn, "\r\n");
 
-    static QRegularExpression nr("\r(?!\n)");
-    sanitizedBody.replace(nr, "\r\n");
+    static const QRegularExpression reCarriageReturnWithoutNewline("\r(?!\n)", QRegularExpression::DontCaptureOption);
+    sanitizedBody.replace(reCarriageReturnWithoutNewline, "\r\n");
 
     this->text = sanitizedBody;
 }

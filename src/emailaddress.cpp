@@ -25,9 +25,9 @@
 EmailAddress::EmailAddress(const QString & address, const QString & name)
     : address(address), name(name)
 {
-    static QRegularExpression re("[\\r\\n]");
-    this->address.remove(re);
-    this->name.remove(re);
+    static const QRegularExpression reNewlineOrCarriageReturn("[\\r\\n]", QRegularExpression::DontCaptureOption);
+    this->address.remove(reNewlineOrCarriageReturn);
+    this->name.remove(reNewlineOrCarriageReturn);
 }
 
 /* [1] --- */
