@@ -46,8 +46,12 @@ MimeText::~MimeText() { }
 void MimeText::setText(const QString & text)
 {
     QString sanitizedBody = text;
-    sanitizedBody.replace(QRegularExpression("(?<!\r)\n"), "\r\n");
-    sanitizedBody.replace(QRegularExpression("\r(?!\n)"), "\r\n");
+
+    static QRegularExpression rn("(?<!\r)\n");
+    sanitizedBody.replace(rn, "\r\n");
+
+    static QRegularExpression nr("\r(?!\n)");
+    sanitizedBody.replace(nr, "\r\n");
 
     this->text = sanitizedBody;
 }
