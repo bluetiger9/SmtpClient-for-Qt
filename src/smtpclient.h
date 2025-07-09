@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2011-2012 - Tőkés Attila
+  Copyright (c) 2011-2025 - Tőkés Attila
 
   This file is part of SmtpClient for Qt.
 
@@ -19,6 +19,8 @@
 #ifndef SMTPCLIENT_H
 #define SMTPCLIENT_H
 
+#include <QMetaEnum>
+
 #include <QObject>
 #include <QtNetwork/QSslSocket>
 #include <QEventLoop>
@@ -29,7 +31,6 @@
 class SMTP_MIME_EXPORT SmtpClient : public QObject
 {
     Q_OBJECT
-    Q_ENUMS (AuthMethod SmtpError ConnectionType ClientState)
 public:
 
     /* [0] Enumerations */
@@ -39,6 +40,7 @@ public:
         AuthPlain,
         AuthLogin
     };
+    Q_ENUM(AuthMethod)
 
     enum SmtpError
     {
@@ -50,6 +52,7 @@ public:
         ClientError = 5,    // 5xx smtp error
         SocketError = 6
     };
+    Q_ENUM(SmtpError)
 
     enum ConnectionType
     {
@@ -57,6 +60,7 @@ public:
         SslConnection = 1,
         TlsConnection = 2      // STARTTLS
     };
+    Q_ENUM(ConnectionType)
 
     enum ClientState {
         UnconnectedState = 0,
@@ -99,6 +103,14 @@ public:
         _MAIL_3_DATA = 84,
         _MAIL_4_SEND_DATA = 85
     };
+    Q_ENUM(ClientState)
+
+    template <typename enumType>
+    static QString string(enumType v)
+    {
+        static QMetaEnum metaEnum = QMetaEnum::fromType<enumType>();
+        return metaEnum.valueToKey(static_cast<int>(v));
+    }
 
     /* [0] --- */
 

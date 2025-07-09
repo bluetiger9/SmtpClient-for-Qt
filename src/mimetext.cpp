@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2011-2012 - Tőkés Attila
+  Copyright (c) 2011-2025 - Tőkés Attila
 
   This file is part of SmtpClient for Qt.
 
@@ -24,6 +24,8 @@
 #include <QTextEncoder>
 #endif
 
+#include <QRegularExpression>
+
 /* [1] Constructors and Destructors */
 
 MimeText::MimeText(const QString &txt)
@@ -43,7 +45,11 @@ MimeText::~MimeText() { }
 
 void MimeText::setText(const QString & text)
 {
-    this->text = text;
+    QString sanitizedBody = text;
+    sanitizedBody.replace(QRegularExpression("(?<!\r)\n"), "\r\n");
+    sanitizedBody.replace(QRegularExpression("\r(?!\n)"), "\r\n");
+
+    this->text = sanitizedBody;
 }
 
 const QString & MimeText::getText() const

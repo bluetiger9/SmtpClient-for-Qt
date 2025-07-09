@@ -100,7 +100,11 @@ void MimeMessage::addCustomHeader(const QString &header)
 
 void MimeMessage::setSubject(const QString & subject)
 {
-    this->subject = subject;
+    QString sanitizedSubject = subject;
+    sanitizedSubject.replace(QRegularExpression("(?<!\r)\n"), "\r\n");
+    sanitizedSubject.replace(QRegularExpression("\r(?!\n)"), "\r\n");
+
+    this->subject = sanitizedSubject;
 }
 
 void MimeMessage::addPart(MimePart *part) {
