@@ -24,7 +24,6 @@
 #include <QTextEncoder>
 #endif
 
-
 /* [1] Constructors and Destructors */
 
 MimeText::MimeText(const QString &txt)

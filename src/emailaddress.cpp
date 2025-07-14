@@ -18,7 +18,6 @@
 
 #include "emailaddress.h"
 
-
 /* [1] Constructors and Destructors */
 
 EmailAddress::EmailAddress(const QString & address, const QString & name)
