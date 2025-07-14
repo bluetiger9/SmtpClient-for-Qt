@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2011-2025 - Tőkés Attila
+  Copyright (c) 2011-2012 - Tőkés Attila
 
   This file is part of SmtpClient for Qt.
 
@@ -18,16 +18,12 @@
 
 #include "emailaddress.h"
 
-#include <QRegularExpression>
 
 /* [1] Constructors and Destructors */
 
 EmailAddress::EmailAddress(const QString & address, const QString & name)
     : address(address), name(name)
 {
-    static const QRegularExpression reNewlineOrCarriageReturn("[\\r\\n]", QRegularExpression::DontCaptureOption);
-    this->address.remove(reNewlineOrCarriageReturn);
-    this->name.remove(reNewlineOrCarriageReturn);
 }
 
 /* [1] --- */

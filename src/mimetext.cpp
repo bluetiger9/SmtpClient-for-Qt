@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2011-2025 - Tőkés Attila
+  Copyright (c) 2011-2012 - Tőkés Attila
 
   This file is part of SmtpClient for Qt.
 
@@ -24,7 +24,6 @@
 #include <QTextEncoder>
 #endif
 
-#include <QRegularExpression>
 
 /* [1] Constructors and Destructors */
 
@@ -45,15 +44,7 @@ MimeText::~MimeText() { }
 
 void MimeText::setText(const QString & text)
 {
-    QString sanitizedBody = text;
-
-    static const QRegularExpression reNewlineWithoutCarriageReturn("(?<!\r)\n", QRegularExpression::DontCaptureOption);
-    sanitizedBody.replace(reNewlineWithoutCarriageReturn, "\r\n");
-
-    static const QRegularExpression reCarriageReturnWithoutNewline("\r(?!\n)", QRegularExpression::DontCaptureOption);
-    sanitizedBody.replace(reCarriageReturnWithoutNewline, "\r\n");
-
-    this->text = sanitizedBody;
+    this->text = text;
 }
 
 const QString & MimeText::getText() const

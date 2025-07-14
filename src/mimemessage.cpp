@@ -21,7 +21,6 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QBuffer>
-#include <QRegularExpression>
 #include "quotedprintable.h"
 #include "mimemultipart.h"
 #include <typeinfo>
@@ -101,15 +100,7 @@ void MimeMessage::addCustomHeader(const QString &header)
 
 void MimeMessage::setSubject(const QString & subject)
 {
-    QString sanitizedSubject = subject;
-
-    static const QRegularExpression reNewlineWithoutCarriageReturn("(?<!\r)\n", QRegularExpression::DontCaptureOption);
-    sanitizedSubject.replace(reNewlineWithoutCarriageReturn, "\r\n");
-
-    static const QRegularExpression reCarriageReturnWithoutNewline("\r(?!\n)", QRegularExpression::DontCaptureOption);
-    sanitizedSubject.replace(reCarriageReturnWithoutNewline, "\r\n");
-
-    this->subject = sanitizedSubject;
+    this->subject = subject;
 }
 
 void MimeMessage::addPart(MimePart *part) {
